@@ -1,0 +1,1569 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Modul interaktif Peracikan Obat: roadmap UTS ke UAS, kartu hafalan, alat hitung, kasus resep, dan bank soal. Created by apt. Bahrain Daffaroos, S.Farm.">
+<meta name="author" content="apt. Bahrain Daffaroos, S.Farm">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px/1.5 system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Modul Peracikan Obat</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&family=Kalam:wght@400;700&display=swap">
+<style>
+/* Layout: rute belajar vertikal ala rak apotek — node kapsul per langkah, dua fase (UTS hijau = logo obat bebas, UAS biru = etiket obat luar) */
+:root{
+  --paper:#f4f7f4; --card:#ffffff; --ink:#132430; --muted:#566a6c; --line:#d6e0da; --line2:#e8eeea;
+  --uts:#0d7a55; --uts-soft:#e1f2e9; --uts-ink:#085c3f;
+  --uas:#2a4fb8; --uas-soft:#e6ecfb; --uas-ink:#1d3b8f;
+  --warn:#a86300; --warn-soft:#fcf0da; --bad:#b3382a; --bad-soft:#f9e4df; --ok:#0d7a55; --ok-soft:#e1f2e9;
+  --resep:#fdfdf7; --resep-ink:#1d3557; --resep-line:#e3e6da;
+  --shadow:0 1px 2px rgba(19,36,48,.06),0 4px 14px rgba(19,36,48,.05);
+  --f-display:"Bricolage Grotesque","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible","Segoe UI",system-ui,-apple-system,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+  --f-hand:"Kalam","Comic Neue","Segoe Print",cursive;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0e1613; --card:#15201c; --ink:#e4eee9; --muted:#9db0a9; --line:#2a3833; --line2:#1f2b27;
+  --uts:#4fc796; --uts-soft:#15322a; --uts-ink:#7fe0b6;
+  --uas:#8fa9ff; --uas-soft:#1a2443; --uas-ink:#b4c6ff;
+  --warn:#f1b552; --warn-soft:#382912; --bad:#ff8b7b; --bad-soft:#3b1d18; --ok:#4fc796; --ok-soft:#15322a;
+  --resep:#18221e; --resep-ink:#c9dcff; --resep-line:#26332e;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25); color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --paper:#0e1613; --card:#15201c; --ink:#e4eee9; --muted:#9db0a9; --line:#2a3833; --line2:#1f2b27;
+  --uts:#4fc796; --uts-soft:#15322a; --uts-ink:#7fe0b6;
+  --uas:#8fa9ff; --uas-soft:#1a2443; --uas-ink:#b4c6ff;
+  --warn:#f1b552; --warn-soft:#382912; --bad:#ff8b7b; --bad-soft:#3b1d18; --ok:#4fc796; --ok-soft:#15322a;
+  --resep:#18221e; --resep-ink:#c9dcff; --resep-line:#26332e;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25); color-scheme:dark;}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--card)}
+a{color:inherit}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--uas);outline-offset:2px;border-radius:6px}
+h1,h2,h3,h4{font-family:var(--f-display);line-height:1.15;text-wrap:balance;margin:0}
+p{margin:0}
+.wrap{max-width:980px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.eyebrow{font-size:.74rem;letter-spacing:.09em;text-transform:uppercase;font-weight:700;color:var(--muted)}
+
+/* ---------- top bar ---------- */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--card);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:14px;padding-block:10px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;min-width:0}
+.brand .mark{flex:none;width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background:var(--ink);color:var(--paper);font-family:var(--f-hand);font-size:1.25rem;font-weight:700;line-height:1}
+.brand b{font-family:var(--f-display);font-size:1.05rem;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand small{display:block;color:var(--muted);font-size:.75rem;line-height:1.2}
+.nav{margin-left:auto;display:flex;gap:4px}
+.nav a{display:flex;align-items:center;gap:6px;text-decoration:none;padding:8px 12px;border-radius:999px;font-weight:700;font-size:.92rem;color:var(--muted)}
+.nav a:hover{background:var(--line2);color:var(--ink)}
+.nav a[aria-current="page"]{background:var(--ink);color:var(--paper)}
+.nav svg{width:18px;height:18px;flex:none}
+.themebtn{flex:none;border:1px solid var(--line);background:transparent;border-radius:999px;width:36px;height:36px;display:grid;place-items:center;cursor:pointer}
+.themebtn svg{width:18px;height:18px}
+@media (max-width:760px){
+  .nav{position:fixed;left:0;right:0;bottom:0;margin:0;background:var(--card);border-top:1px solid var(--line);justify-content:space-around;
+    padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px));z-index:25}
+  .nav a{flex-direction:column;gap:2px;font-size:.7rem;padding:6px 8px;border-radius:12px;flex:1;justify-content:center}
+  .nav a[aria-current="page"]{background:var(--line2);color:var(--ink)}
+  main{padding-bottom:84px}
+  .themebtn{margin-left:auto}
+}
+
+main{padding-block:22px 48px}
+.view{display:grid;gap:22px}
+
+/* ---------- hero / map ---------- */
+.hero{display:grid;gap:14px;padding:22px;border-radius:20px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow)}
+.hero h1{font-size:clamp(1.65rem,4.6vw,2.5rem);letter-spacing:-.015em}
+.hero h1 em{font-style:normal;font-family:var(--f-hand);color:var(--uts);font-weight:700}
+.hero p.lead{max-width:62ch;color:var(--muted)}
+.progressrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.bar{flex:1;min-width:180px;height:14px;border-radius:999px;background:var(--line2);overflow:hidden;display:flex;border:1px solid var(--line)}
+.bar i{display:block;height:100%}
+.bar .u{background:var(--uts)} .bar .a{background:var(--uas)}
+.howto{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.howto div{padding:12px;border-radius:14px;background:var(--paper);border:1px solid var(--line2);min-width:0}
+.howto b{display:block;font-family:var(--f-display);font-size:1rem}
+.howto span{font-size:.86rem;color:var(--muted)}
+@media (max-width:640px){.howto{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.phase{display:grid;gap:10px}
+.phasehead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;padding-inline:4px}
+.phasehead h2{font-size:1.45rem}
+.phasehead .tag{font-weight:700;font-size:.8rem;padding:3px 10px;border-radius:999px}
+.phase.uts .tag{background:var(--uts-soft);color:var(--uts-ink)}
+.phase.uas .tag{background:var(--uas-soft);color:var(--uas-ink)}
+.route{list-style:none;margin:0;padding:0;display:grid;gap:0;position:relative}
+.stop{display:grid;grid-template-columns:58px minmax(0,1fr);gap:12px;position:relative}
+.stop::before{content:"";position:absolute;left:28px;top:0;bottom:0;width:3px;background:var(--line);border-radius:3px}
+.stop:first-child::before{top:26px}.stop:last-child::before{bottom:calc(100% - 26px)}
+.phase.uts .stop.done::before{background:var(--uts)} .phase.uas .stop.done::before{background:var(--uas)}
+.cap{position:relative;z-index:1;margin-top:10px;width:58px;height:30px;border-radius:999px;display:flex;overflow:hidden;border:2px solid var(--pc);background:var(--card);font-family:var(--f-mono);font-weight:700;font-size:.85rem}
+.cap span{flex:1;display:grid;place-items:center}
+.cap span:first-child{background:var(--pc);color:var(--card)}
+.cap span:last-child{color:var(--pc)}
+.stop.done .cap span:last-child{background:var(--pc);color:var(--card);border-left:2px solid var(--card)}
+.uts{--pc:var(--uts);--ps:var(--uts-soft);--pi:var(--uts-ink)} .uas{--pc:var(--uas);--ps:var(--uas-soft);--pi:var(--uas-ink)}
+.stopcard{margin-bottom:12px;display:grid;gap:6px;padding:14px 16px;border-radius:16px;background:var(--card);border:1px solid var(--line);text-decoration:none;box-shadow:var(--shadow);transition:transform .15s ease,border-color .15s ease}
+.stopcard:hover{transform:translateY(-1px);border-color:var(--pc)}
+.stopcard h3{font-size:1.12rem}
+.stopcard p{font-size:.92rem;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:.74rem;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--line2);color:var(--muted);white-space:nowrap}
+.chip.st{background:var(--ps);color:var(--pi)}
+.chip.warn{background:var(--warn-soft);color:var(--warn)}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}
+.checkpoint .cap{border-style:dashed}
+.checkpoint .stopcard{background:var(--ps);border-color:transparent}
+
+/* ---------- topic ---------- */
+.crumb{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:.86rem;color:var(--muted)}
+.crumb a{text-decoration:none;font-weight:700;color:var(--muted)}
+.crumb a:hover{color:var(--ink)}
+.thead{display:grid;gap:10px;padding:22px;border-radius:20px;background:var(--ps);border:1px solid var(--line)}
+.thead h1{font-size:clamp(1.5rem,4vw,2.15rem)}
+.thead p{max-width:64ch}
+.thead .src{font-size:.84rem;color:var(--muted)}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{flex:none;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:8px 14px;font-weight:700;cursor:pointer;font-size:.9rem;display:flex;gap:6px;align-items:center}
+.tabs button[aria-selected="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.tabs button .n{font-family:var(--f-mono);font-size:.75rem;opacity:.75}
+.panel{display:grid;gap:16px}
+.block{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;display:grid;gap:10px;min-width:0}
+.block h3{font-size:1.12rem}
+.block h4{font-size:.98rem;margin-top:4px}
+.block ul,.block ol{margin:0;padding-left:1.2em;display:grid;gap:4px}
+.block li::marker{color:var(--muted)}
+.block p{max-width:68ch}
+.block b{font-weight:700}
+.trap{background:var(--warn-soft);border-color:transparent}
+.trap h3{color:var(--warn)}
+.flag{background:var(--bad-soft);border-color:transparent}
+.cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+@media (max-width:700px){.cols{grid-template-columns:1fr}}
+.tw{overflow-x:auto;border:1px solid var(--line2);border-radius:12px}
+table.t{border-collapse:collapse;width:100%;font-size:.9rem;min-width:420px}
+table.t th,table.t td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line2);vertical-align:top}
+table.t th{background:var(--paper);font-size:.78rem;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+table.t tr:last-child td{border-bottom:0}
+table.t td.n{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.formula{font-family:var(--f-mono);font-size:.9rem;background:var(--paper);border:1px solid var(--line2);border-radius:10px;padding:10px 12px;overflow-wrap:anywhere}
+.tnav{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:10px 16px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;min-height:44px}
+.btn:hover{border-color:var(--ink)}
+.btn.pri{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn.done{background:var(--ok-soft);color:var(--ok);border-color:transparent}
+.btn.sm{padding:6px 12px;min-height:36px;font-size:.88rem;border-radius:10px}
+
+/* ---------- resep slip ---------- */
+.resep{background:var(--resep);color:var(--resep-ink);border:1px solid var(--resep-line);border-radius:6px;padding:16px 18px 14px;font-family:var(--f-hand);font-size:1.12rem;line-height:1.5;position:relative;box-shadow:var(--shadow);
+  background-image:repeating-linear-gradient(to bottom,transparent 0 31px,var(--resep-line) 31px 32px);background-position:0 46px}
+.resep .rhead{font-family:var(--f-body);font-size:.75rem;color:var(--muted);display:flex;justify-content:space-between;gap:8px;border-bottom:2px solid var(--resep-ink);padding-bottom:6px;margin-bottom:8px;flex-wrap:wrap}
+.resep .rx{font-weight:700;font-size:1.4rem;margin-right:6px}
+.resep .ln{display:block;white-space:pre-wrap}
+.resep .pro{font-family:var(--f-body);font-size:.85rem;border-top:1px dashed var(--resep-ink);margin-top:8px;padding-top:6px;color:var(--resep-ink)}
+.resep .paraf{position:absolute;right:16px;bottom:44px;font-size:1.3rem;transform:rotate(-8deg);opacity:.8}
+
+/* ---------- steps / reveal ---------- */
+.steps{display:grid;gap:10px;counter-reset:s}
+.step{border:1px solid var(--line);border-radius:14px;background:var(--card);overflow:hidden}
+.step summary{list-style:none;cursor:pointer;padding:12px 14px;display:flex;gap:10px;align-items:flex-start;font-weight:700}
+.step summary::-webkit-details-marker{display:none}
+.step summary::before{counter-increment:s;content:counter(s);flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--line2);font-family:var(--f-mono);font-size:.8rem}
+.step[open] summary::before{background:var(--ink);color:var(--paper)}
+.step .ans{padding:0 14px 14px 50px;display:grid;gap:8px}
+.step .hint{font-weight:400;color:var(--muted);font-size:.85rem;display:block}
+
+/* ---------- quiz ---------- */
+.filters{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+.field{display:grid;gap:4px;min-width:0}
+.field label{font-size:.78rem;font-weight:700;color:var(--muted)}
+select,input[type=number],input[type=date],input[type=text]{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:9px 10px;min-height:42px;width:100%;min-width:0}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--card)}
+.seg button{border:0;background:transparent;padding:9px 12px;font-weight:700;cursor:pointer;font-size:.88rem}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.qcard{display:grid;gap:14px}
+.qmeta{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center}
+.qctx{border-left:4px solid var(--line);padding:8px 12px;background:var(--paper);border-radius:0 10px 10px 0;font-size:.92rem;white-space:pre-line}
+.qtext{font-size:1.08rem;font-weight:700}
+.opts{display:grid;gap:8px}
+.opt{text-align:left;border:1.5px solid var(--line);background:var(--card);border-radius:12px;padding:12px 14px;cursor:pointer;display:flex;gap:10px;align-items:flex-start;min-height:48px}
+.opt .k{flex:none;width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:var(--line2);font-family:var(--f-mono);font-weight:700;font-size:.82rem}
+.opt:hover:not([disabled]){border-color:var(--ink)}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)} .opt.right .k{background:var(--ok);color:var(--card)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)} .opt.wrong .k{background:var(--bad);color:var(--card)}
+.opt[disabled]{cursor:default}
+.exp{padding:12px 14px;border-radius:12px;background:var(--paper);border:1px solid var(--line2);display:grid;gap:6px}
+.exp .flagnote{color:var(--warn);font-size:.9rem}
+.score{display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+.score .big{font-family:var(--f-display);font-size:2.4rem;line-height:1}
+.dots{display:flex;flex-wrap:wrap;gap:4px}
+.dots i{width:10px;height:10px;border-radius:3px;background:var(--line)}
+.dots i.r{background:var(--ok)} .dots i.w{background:var(--bad)} .dots i.c{outline:2px solid var(--ink);outline-offset:1px}
+
+/* ---------- flashcards ---------- */
+.deck{display:grid;gap:14px;justify-items:center}
+.flip{width:100%;max-width:560px;aspect-ratio:8/5;perspective:1200px;cursor:pointer;border:0;background:transparent;padding:0}
+.flip .in{position:relative;width:100%;height:100%;transition:transform .45s cubic-bezier(.2,.7,.2,1);transform-style:preserve-3d}
+.flip.on .in{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:18px;padding:22px;display:grid;place-items:center;text-align:center;border:1px solid var(--line);box-shadow:var(--shadow);overflow:auto}
+.face.f{background:var(--card)}
+.face.f .q{font-family:var(--f-display);font-size:clamp(1.25rem,4.5vw,1.8rem);font-weight:700}
+.face.b{background:var(--ps,var(--uts-soft));transform:rotateY(180deg);font-size:1rem;line-height:1.5}
+.face .lab{position:absolute;top:12px;left:16px;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.deckbtns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+@media (prefers-reduced-motion:reduce){.flip .in{transition:none}.stopcard{transition:none}}
+
+/* ---------- tools ---------- */
+.tools{display:grid;gap:16px}
+.tool{display:grid;gap:12px}
+.tool .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.out{border-radius:12px;background:var(--paper);border:1px solid var(--line2);padding:12px 14px;display:grid;gap:6px;font-size:.95rem}
+.out .res{font-family:var(--f-display);font-size:1.35rem;font-weight:700}
+.out .calc{font-family:var(--f-mono);font-size:.84rem;color:var(--muted);white-space:pre-wrap;overflow-x:auto}
+.pill{display:inline-block;padding:2px 10px;border-radius:999px;font-weight:700;font-size:.82rem}
+.pill.ok{background:var(--ok-soft);color:var(--ok)} .pill.bad{background:var(--bad-soft);color:var(--bad)} .pill.warn{background:var(--warn-soft);color:var(--warn)}
+.presets{display:flex;flex-wrap:wrap;gap:6px}
+.toolnav{display:flex;flex-wrap:wrap;gap:6px}
+.toolnav a{text-decoration:none;font-size:.85rem;font-weight:700;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card)}
+.toolnav a:hover{border-color:var(--ink)}
+.capsviz{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap;padding:6px 0}
+.capsviz div{display:grid;justify-items:center;gap:4px;font-family:var(--f-mono);font-size:.72rem;color:var(--muted)}
+.capsviz i{display:block;border-radius:999px;border:2px solid var(--line);background:var(--card)}
+.capsviz div.sel i{border-color:var(--uas);background:var(--uas-soft)}
+.capsviz div.sel{color:var(--uas);font-weight:700}
+
+.essay{display:grid;gap:8px}
+.essay details{border:1px solid var(--line2);border-radius:12px;padding:10px 12px;background:var(--card)}
+.essay summary{cursor:pointer;font-weight:700}
+.essay details p{margin-top:6px;color:var(--muted)}
+.empty{padding:26px;text-align:center;color:var(--muted)}
+.foot{padding-block:10px 30px;color:var(--muted);font-size:.84rem}
+
+.qbar{height:6px;border-radius:99px;background:var(--line2);overflow:hidden}.qbar i{display:block;height:100%;background:var(--ink)}
+.credit{padding-block:8px 28px}
+.creditin{display:flex;gap:12px;align-items:center;padding:14px 16px;border-radius:16px;background:var(--card);border:1px solid var(--line)}
+.creditin .mark{flex:none;width:38px;height:38px;display:grid;place-items:center;border-radius:10px;background:var(--ink);color:var(--paper);font-family:var(--f-hand);font-weight:700;font-size:1.2rem}
+.creditin b{display:block;font-family:var(--f-display);font-size:1rem}
+.creditin span{display:block;color:var(--muted);font-size:.85rem}
+.byline{font-size:.9rem;color:var(--muted)}.byline b{color:var(--ink)}
+
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+ <a class="brand" href="#peta"><span class="mark" aria-hidden="true">R/</span><span><b>Modul Peracikan Obat</b><small>Roadmap UTS → UAS</small></span></a>
+ <nav class="nav" aria-label="Menu utama">
+  <a href="#peta" data-ic="map">Peta</a>
+  <a href="#kasus" data-ic="rx">Kasus</a>
+  <a href="#alat" data-ic="calc">Alat</a>
+  <a href="#kartu" data-ic="card">Kartu</a>
+  <a href="#kuis" data-ic="quiz">Kuis</a>
+ </nav>
+ <button class="themebtn" id="themeBtn" type="button" aria-label="Ganti tema"></button>
+</div></header>
+<main><div class="wrap" id="app"></div>
+<footer class="wrap credit"><div class="creditin"><span class="mark" aria-hidden="true">R/</span><div><b>Module created by apt. Bahrain Daffaroos, S.Farm</b><span>Pharmaceutical Compounding (Peracikan Obat) learning module, compiled from lecture slides and past exam archives for tutoring purposes.</span></div></div></footer></main>
+<script>
+// ===================== TOPIK / ROADMAP =====================
+const TOPICS = [
+/* ---------------- 1 ---------------- */
+{id:"t1", fase:"UTS", no:1, title:"Pengantar & Bentuk Sediaan",
+ short:"Istilah dasar, penggolongan obat, dan peta bentuk sediaan padat, setengah padat, cair.",
+ src:"Kuliah Pengantar P.O.pptx · sediaan.pdf", tools:[], cases:[],
+ blocks:[
+ {h:"Istilah yang wajib lancar", html:`
+ <ul>
+  <li><b>Farmasetika</b>: ilmu farmasi yang mempelajari bahan obat dan obat.</li>
+  <li><b>Farmakope</b> (pharmacon = obat, poiein = buat): buku standar resep/formula untuk membuat atau menyiapkan obat. Isinya: ketentuan umum, sediaan umum, monografi, lampiran.</li>
+  <li><b>Bahan obat</b>: zat aktif untuk mencegah, meringankan, menyembuhkan, atau mendiagnosis penyakit. <b>Obat</b>: bentuk sediaan tertentu dari bahan obat.</li>
+  <li><b>Obat generik</b>: nama resmi sesuai Farmakope Indonesia. <b>Generik berlogo</b>: tercantum di DOEN, dibuat sesuai CPOB, diuji ulang POM.</li>
+  <li><b>Obat paten</b>: nama dagang terdaftar atas nama produsen, dijual dalam bungkus asli pabrik.</li>
+  <li><b>DOEN</b> = daftar obat esensial nasional. <b>DOWA</b> = obat wajib apotek, yaitu obat keras yang boleh diserahkan apoteker tanpa resep.</li>
+ </ul>`},
+ {h:"Resep rasional: 6 tepat", html:`<p>Obat tepat · dosis tepat · bentuk sediaan tepat · waktu &amp; cara pemberian tepat · jumlah tepat · penderita tepat.</p>
+ <p class="muted">Parameter yang dipertimbangkan: sifat fisik &amp; kimia obat, dosis (lazim, maksimum, toksik), bentuk sediaan, cara &amp; waktu pemberian, farmakokinetik; serta umur, berat badan, jenis kelamin, dan kondisi penderita.</p>`},
+ {h:"Penggolongan obat menurut keamanan", html:`<div class="tw"><table class="t"><thead><tr><th>Golongan</th><th>Daftar</th><th>Ciri penting</th></tr></thead><tbody>
+  <tr><td><b>Narkotika</b></td><td>O (opiat)</td><td>Wajib resep, <b>tidak boleh diulang</b> (tanpa tanda iter), wajib alamat pasien, aturan pakai jelas (tidak boleh u.c./p.r.n.). 3 golongan; gol. I hanya untuk ilmu pengetahuan.</td></tr>
+  <tr><td><b>Obat keras</b></td><td>G (gevaarlijk = berbahaya)</td><td>Wajib resep, dokter boleh menulis iter. Logo huruf K. Psikotropika termasuk obat keras, pelaporannya seperti narkotika.</td></tr>
+  <tr><td><b>Bebas terbatas</b></td><td>W (waarschuwing = peringatan)</td><td>Tanpa resep, diserahkan dalam bungkus asli, ada tanda peringatan P1–P6.</td></tr>
+  <tr><td><b>Obat bebas</b></td><td>—</td><td>OTC, untuk pengobatan sendiri.</td></tr>
+ </tbody></table></div>
+ <h4>Tanda peringatan P1–P6 (semua diawali "Awas! Obat keras")</h4>
+ <ol><li>P1: Baca aturan pakainya</li><li>P2: Hanya untuk kumur, jangan ditelan</li><li>P3: Hanya untuk bagian luar badan</li><li>P4: Hanya untuk dibakar</li><li>P5: Tidak boleh ditelan</li><li>P6: Obat wasir, jangan ditelan</li></ol>`},
+ {h:"Peta bentuk sediaan", html:`<div class="cols">
+  <div><h4>Padat</h4><ul><li>Pulvis = serbuk</li><li>Pulveres = serbuk bagi (puyer)</li><li>Tabulae = tablet</li><li>Capsulae = kapsul</li><li>Pilulae = pil</li><li>Suppositoria</li></ul></div>
+  <div><h4>Setengah padat</h4><ul><li>Unguentum = salep</li><li>Cremor = krim</li><li>Pastae = pasta</li></ul><h4>Cair</h4><ul><li>Solutio = larutan</li><li>Suspensio = suspensi</li><li>Emulsum = emulsi</li><li>Injectiones = injeksi</li></ul></div></div>
+  <h4>Suppositoria (angka yang sering keluar)</h4>
+  <div class="tw"><table class="t"><thead><tr><th>Jenis</th><th>Bobot</th><th>Catatan</th></tr></thead><tbody>
+   <tr><td>Analia (rektal)</td><td class="n">dewasa 2 g</td><td>anak ½ dewasa</td></tr>
+   <tr><td>Vaginalia = ovula</td><td class="n">5 g</td><td>bentuk lonjong/oval</td></tr>
+   <tr><td>Urethralia = bacilla</td><td class="n">♀ 2 g · ♂ 4 g</td><td>Ø 5 mm; panjang ♀ 50 mm, ♂ 125 mm; basis ol. cacao</td></tr>
+  </tbody></table></div>
+  <p class="muted">Suppositoria dipakai sesudah buang air besar atau malam sebelum tidur, disimpan pada 5–15 °C.</p>`},
+ ],
+ traps:["Daftar O, G, W sering ditukar. Ingat: <b>O</b>piat, <b>G</b>evaarlijk (berbahaya), <b>W</b>aarschuwing (peringatan).",
+        "Resep narkotika: tidak boleh iter dan tidak boleh <i>m.i.</i> (mihi ipsi), harus ada alamat pasien.",
+        "Pulvis = serbuk tak terbagi; pulveres = serbuk terbagi. Jangan tertukar."],
+ cards:[
+  ["Arti kata Farmakope","pharmacon = obat, poiein = buat. Buku standar formula untuk membuat/menyiapkan obat."],
+  ["6 tepat resep rasional","Obat, dosis, bentuk sediaan, waktu & cara pemberian, jumlah, penderita."],
+  ["Daftar O","Narkotika (opiat). Resep tidak boleh diulang, wajib alamat pasien."],
+  ["Daftar G","Obat keras (gevaarlijk = berbahaya). Wajib resep, boleh iter."],
+  ["Daftar W","Obat bebas terbatas (waarschuwing = peringatan). Ada tanda P1–P6."],
+  ["P3","Awas! Obat keras. Hanya untuk bagian luar badan."],
+  ["P2 vs P5","P2: hanya untuk kumur, jangan ditelan. P5: tidak boleh ditelan."],
+  ["DOWA","Obat wajib apotek: obat keras yang boleh diserahkan apoteker tanpa resep dokter."],
+  ["Generik berlogo","Obat generik esensial di DOEN, diproduksi sesuai CPOB dan diuji ulang POM."],
+  ["Bobot ovula","5 gram, bentuk lonjong/oval."],
+  ["Bobot supositoria anal dewasa","2 gram (anak ½ dewasa)."],
+  ["Bacilla pria","Ø 5 mm, panjang 125 mm, bobot 4 g."],
+  ["Cremor","Krim (sediaan setengah padat)."],
+ ]},
+/* ---------------- 2 ---------------- */
+{id:"t2", fase:"UTS", no:2, title:"Membaca Resep & Bahasa Latin",
+ short:"Bagian resep, aturan penulisan, singkatan Latin, angka Romawi.",
+ src:"RESEP.pptx · Kuliah Pengantar P.O.pptx", tools:["romawi"], cases:["c1","c3"],
+ blocks:[
+ {h:"Apa itu resep", html:`<p>Permintaan tertulis dari <b>dokter, dokter gigi, atau dokter hewan</b> yang punya izin praktik kepada apoteker untuk membuat, menyediakan, dan menyerahkan obat kepada pasien. Resep dokter hewan hanya untuk hewan.</p>
+ <p><b>Formula officinales</b> = obat jadi/sediaan standar pabrik. <b>Formula magistrales</b> = racikan yang komposisinya ditulis dokter.</p>`},
+ {h:"Bagian-bagian resep", html:`<p>Di slide muncul <b>dua cara penamaan</b>. Pahami isinya, lalu ikuti istilah yang dipakai dosen pengujimu.</p>
+ <div class="tw"><table class="t"><thead><tr><th>Isi</th><th>Versi slide "Hal yang harus ada"</th><th>Versi slide "Tabel contoh resep"</th></tr></thead><tbody>
+  <tr><td>Nama, alamat, SIP dokter; kota &amp; tanggal</td><td>Inscriptio</td><td>—</td></tr>
+  <tr><td>Tanda R/ (recipe = ambillah)</td><td>Invocatio</td><td>Praescriptio</td></tr>
+  <tr><td>Nama &amp; jumlah tiap obat</td><td>Invocatio (bersama R/)</td><td>Inscriptio (tubuh resep)</td></tr>
+  <tr><td>Petunjuk untuk peracik (m.f. pulv. d.t.d. No. X)</td><td>—</td><td>Subscriptio</td></tr>
+  <tr><td>Aturan pakai untuk pasien (S. 3 d.d. I)</td><td>Signatura</td><td>Signatura</td></tr>
+  <tr><td>Paraf / tanda tangan dokter</td><td>Subscriptio</td><td>—</td></tr>
+ </tbody></table></div>`},
+ {h:"Aturan penulisan resep", html:`<ul>
+  <li>Ditulis lengkap, jelas, dalam bahasa Latin. Jika tidak terbaca atau keliru, apoteker <b>menanyakan ke dokter</b>. Jika dokter tetap pada pendiriannya, dokter menandatangani resep dan bertanggung jawab.</li>
+  <li><b>Cito / statim / urgent / p.i.m.</b> (periculum in mora = bahaya bila ditunda) ditulis di kanan atas untuk pasien yang perlu segera.</li>
+  <li><b>n.i.</b> (ne iteretur) = tidak boleh diulang. <b>Iter 1x</b> = boleh diulang sekali.</li>
+  <li><b>p.p.</b> (pro paupere) = resep untuk orang miskin.</li>
+  <li>Obat disusun: obat pokok (remedium cardinale) dulu, lalu bahan tambahan (adjuvans), korigen (corrigens actionis, saporis, odoris, coloris), dan bahan pembawa (constituens).</li>
+  <li>Bahan aktif ditulis lebih dulu, bahan dasar/pelarut terakhir.</li>
+ </ul>`},
+ {h:"Kunci membaca baris peracikan", html:`<div class="tw"><table class="t"><thead><tr><th>Tulisan</th><th>Artinya</th><th>Akibat ke hitungan</th></tr></thead><tbody>
+  <tr><td class="n">m.f. pulv. No. XX</td><td>campur, buat serbuk 20 bungkus</td><td>Jumlah di resep = <b>total</b>, dibagi 20</td></tr>
+  <tr><td class="n">m.f. pulv. d.t.d. No. X</td><td>campur, buat dengan takaran tersebut 10 bungkus</td><td>Jumlah di resep = <b>per bungkus</b>, kalikan 10</td></tr>
+  <tr><td class="n">da in caps.</td><td>masukkan ke kapsul</td><td>Pilih nomor kapsul</td></tr>
+  <tr><td class="n">m.f. ungt. 20</td><td>buat salep 20 gram</td><td>—</td></tr>
+  <tr><td class="n">ad 30</td><td>sampai total 30 (g)</td><td>basis = 30 − bahan lain</td></tr>
+  <tr><td class="n">aa</td><td>ana, sama banyak</td><td>tiap bahan sebelum "aa" mendapat jumlah itu</td></tr>
+  <tr><td class="n">q.s.</td><td>quantum satis, secukupnya</td><td>hitung sendiri (mis. SL pengisi)</td></tr>
+ </tbody></table></div>`},
+ {h:"Angka Romawi & bilangan Latin", html:`<p>I = 1 · V = 5 · X = 10 · L = 50 · C = 100 · D = 500 · M = 1000. Angka kecil di kiri berarti dikurangi: XL = 40, XXIX = 29.</p>
+ <p>bis = 2 · ter = 3 · dimidia = ½ · pars tertia = ⅓ · pars quarta = ¼ · pars quinta = ⅕.</p>`},
+ ],
+ traps:["<b>d.t.d. vs tanpa d.t.d.</b> adalah sumber salah hitung nomor satu. Selalu cek dulu sebelum menghitung.",
+        "Resep narkotika tidak boleh memakai u.c. (usus cognitus) atau p.r.n./bila nyeri; aturan pakai harus jelas.",
+        "Romawi: kalikan lebih dulu ke jumlah bungkus, baru dihitung dosis per hari."],
+ cards: [] /* diisi otomatis dari LATIN */},
+/* ---------------- 3 ---------------- */
+{id:"t3", fase:"UTS", no:3, title:"Dosis & Cek Dosis Maksimum",
+ short:"Rumus dosis anak, persen DM sekali & sehari, DM gabungan, dosis lansia.",
+ src:"dosis.pdf (Dr. apt. Rini Agustin) · Perhitungan Dosis.pdf", tools:["dosisanak","dm"], cases:["c1","c2","c3"],
+ blocks:[
+ {h:"Istilah dosis", html:`<ul>
+  <li><b>Dosis lazim (DL)</b>: dosis yang biasa dipakai pada keadaan normal. <b>Dosis maksimum (DM)</b>: batas atas yang boleh dipakai.</li>
+  <li><b>Loading dose</b>: dosis awal/muatan supaya kadar darah cepat cukup. <b>Maintenance dose</b>: dosis pemeliharaan.</li>
+  <li>Ukuran: sendok makan (C) = 15 ml, sendok teh (cth) = 5 ml, 1 ml air = 20 tetes (20 °C).</li>
+  <li>Dalam FI III, DM berlaku untuk dewasa 20–60 tahun dengan bobot 58–60 kg.</li>
+ </ul>`},
+ {h:"Rumus dosis anak", html:`<div class="tw"><table class="t"><thead><tr><th>Rumus</th><th>Faktor × dosis dewasa</th><th>Dipakai untuk</th></tr></thead><tbody>
+  <tr><td><b>Young</b></td><td class="n">n / (n + 12)</td><td>anak &lt; 8 tahun (n = tahun)</td></tr>
+  <tr><td><b>Dilling</b></td><td class="n">n / 20</td><td>anak &gt; 8 tahun</td></tr>
+  <tr><td><b>Cowling</b></td><td class="n">(n + 1) / 24</td><td>berdasarkan usia</td></tr>
+  <tr><td><b>Fried</b></td><td class="n">m / 150</td><td>bayi (m = bulan)</td></tr>
+  <tr><td><b>Clark</b></td><td class="n">BB(pon) / 150</td><td>bobot; 1 kg = 2,2 pon</td></tr>
+  <tr><td><b>Thremich-Fier</b></td><td class="n">BB(kg) / 70</td><td>bobot</td></tr>
+  <tr><td><b>Black</b></td><td class="n">BB(kg) / 62</td><td>bobot</td></tr>
+  <tr><td><b>LPT (BSA)</b></td><td class="n">LPT(m²) / 1,73</td><td>paling akurat; kemoterapi, pediatri</td></tr>
+  <tr><td><b>Augsberger</b></td><td class="n">(1,5 × BB + 10) / 100</td><td>bobot</td></tr>
+ </tbody></table></div>
+ <p class="muted">Catatan: slide dosis.pdf menulis "Clark = BB(kg)/70", sedangkan slide Perhitungan Dosis memberi nama itu <i>Thremich-Fier</i> dan memakai Clark = pon/150. Hasilnya hampir sama (150 pon ≈ 68 kg).</p>
+ <h4>Gaubius (pecahan dosis dewasa)</h4>
+ <p class="mono" style="font-size:.88rem">0–1 th: 1/12 · 1–2 th: 1/8 · 2–3 th: 1/6 · 3–4 th: 1/4 · 4–7 th: 1/3 · 7–14 th: 1/2 · 14–21 th: 2/3 · 21–60 th: dewasa</p>
+ <h4>LPT (luas permukaan tubuh)</h4>
+ <div class="formula">LPT (m²) = √(tinggi cm × bobot kg / 3600)</div>
+ <p class="muted">Contoh slide: anak 7 th, 101 cm, 17 kg → LPT ≈ 0,69 m² → omeprazol 0,69/1,73 × 20 mg ≈ 8 mg sehari.</p>`},
+ {h:"Cek dosis maksimum (DM)", html:`<div class="formula">% DM sekali = dosis sekali pakai ÷ DM sekali × 100%</div>
+ <div class="formula">% DM sehari = (dosis sekali × frekuensi) ÷ DM sehari × 100%</div>
+ <ul>
+  <li>Untuk anak, DM dewasa dikalikan dulu dengan faktor umur (Young/Dilling, dst.).</li>
+  <li>DM <b>terlampaui bila &gt; 100%</b>. Jika dokter memang sengaja, ia memberi <b>tanda seru (!) dan paraf</b> di belakang obat. Tanpa tanda itu, obat tidak dibuat dan apoteker menanyakan ke dokter.</li>
+  <li><b>DM gabungan</b>: jika ada 2 obat atau lebih yang kerjanya searah, persennya <b>dijumlahkan</b>.</li>
+  <li>Frekuensi per hari: FI III memakai 24 jam (tiap 3 jam = 24/3 = 8 kali). Van Duin memakai 16 jam, kecuali antibiotik 24 jam.</li>
+ </ul>
+ <h4>Contoh 1 · Atropin (slide dosis)</h4>
+ <div class="resep"><span class="ln"><span class="rx">R/</span>Atropini sulfas 1,5 mg</span><span class="ln">     Sacch. lactis q.s.</span><span class="ln">     m.f. pulv. d.t.d. No. X</span><span class="ln">     S. 4 d.d. pulv. I</span></div>
+ <div class="formula">DM atropin 2 mg / 4 mg → sekali 1,5/2 = 75% · sehari 4×1,5/4 = 150% → DM sehari terlampaui</div>
+ <h4>Contoh 2 · DM gabungan (slide Perhitungan Dosis)</h4>
+ <p>R/ Atropin sulfat 2,5 mg (DM 1/3 mg) + Ekstrak belladon 100 mg (DM 20/80 mg), m.f. pulv. No. X, S. t.d.d. pulv. I.</p>
+ <div class="formula">Per bungkus: atropin 0,25 mg · belladon 10 mg</div>
+ <div class="formula">Sekali: atropin 0,25/1 = 25% + belladon 10/20 = 50% → 75%</div>
+ <div class="formula">Sehari: atropin 0,75/3 = 25% + belladon 30/80 = 37,5% → 62,5%</div>
+ <p>Keduanya di bawah 100%, jadi DM gabungan tidak terlampaui.</p>`},
+ {h:"Dosis lansia (FI III)", html:`<div class="tw"><table class="t"><thead><tr><th>Usia</th><th>Bagian dosis dewasa</th></tr></thead><tbody>
+  <tr><td>60–70 th</td><td class="n">4/5</td></tr><tr><td>70–80 th</td><td class="n">3/4</td></tr><tr><td>80–90 th</td><td class="n">2/3</td></tr><tr><td>&gt; 90 th</td><td class="n">1/2</td></tr></tbody></table></div>
+ <p class="muted">Slide dosis.pdf juga menyebut untuk obat yang cenderung toksik: 65–74 th dikurangi 10%, 75–84 th dikurangi 20%, ≥ 85 th dikurangi 30%.</p>`},
+ ],
+ traps:["Ujian Bu Yaya memakai <b>Young untuk anak &lt; 8 th</b> (6 th 3 bln → n = 6,25) dan <b>Dilling untuk &gt; 8 th</b> (8 th 5 bln → n = 8,42). Ubah bulan ke desimal tahun dulu.",
+        "Hitung dosis <b>sekali pakai per bungkus</b> dulu. Pada resep tanpa d.t.d., bagi total dengan jumlah bungkus.",
+        "Efedrin HCl tablet 10 mg berbobot 100 mg: yang dipakai untuk %DM adalah kandungan zatnya (10 mg), bukan bobot tabletnya."],
+ cards:[
+  ["Rumus Young","n/(n+12) × dosis dewasa. n = umur tahun, untuk anak < 8 th."],
+  ["Rumus Dilling","n/20 × dosis dewasa, untuk anak > 8 th."],
+  ["Rumus Fried","m/150 × dosis dewasa. m = umur bulan, untuk bayi."],
+  ["Rumus Cowling","(n+1)/24 × dosis dewasa."],
+  ["Rumus Clark","Bobot (pon)/150 × dosis dewasa. 1 kg = 2,2 pon."],
+  ["Thremich-Fier & Black","Thremich-Fier: kg/70. Black: kg/62."],
+  ["Rumus LPT","LPT anak (m²) / 1,73 × dosis dewasa."],
+  ["Kapan DM terlampaui?","Jika % DM > 100%. Dokter harus memberi tanda seru (!) + paraf."],
+  ["DM gabungan","Untuk 2+ obat yang kerjanya searah: persen DM dijumlahkan."],
+  ["Lansia 70–80 th (FI III)","3/4 dosis dewasa."],
+  ["Lansia 60–70 th (FI III)","4/5 dosis dewasa."],
+  ["1 C dan 1 cth","C (sendok makan) = 15 ml; cth (sendok teh) = 5 ml."],
+  ["1 ml air = ... tetes","20 tetes (pada 20 °C)."],
+  ["Van Duin vs FI III","Van Duin: sehari = 16 jam (antibiotik 24 jam). FI III: 24 jam."],
+  ["Loading vs maintenance dose","Loading: dosis awal supaya kadar cepat tercapai. Maintenance: mempertahankan kadar."],
+ ]},
+/* ---------------- 4 ---------------- */
+{id:"t4", fase:"UTS", no:4, title:"Timbangan, Penimbangan & Pengenceran",
+ short:"Jenis timbangan, wadah menimbang per jenis bahan, batas 50 mg, pengenceran 1:10, 1:50, bertingkat.",
+ src:"teknik penimbangan.pdf", tools:["encer"], cases:["c3"],
+ blocks:[
+ {h:"Tiga jenis timbangan", html:`<div class="tw"><table class="t"><thead><tr><th>Timbangan</th><th>Daya beban</th><th>Kepekaan</th></tr></thead><tbody>
+  <tr><td>Gram kasar</td><td class="n">250–1000 g</td><td class="n">200 mg</td></tr>
+  <tr><td>Gram halus</td><td class="n">100–200 g</td><td class="n">50 mg</td></tr>
+  <tr><td>Miligram</td><td class="n">10–50 g</td><td class="n">5 mg</td></tr></tbody></table></div>
+ <p><b>Daya beban</b> = bobot maksimum yang boleh ditimbang. <b>Kepekaan</b> = tambahan bobot maksimum pada satu piring (setelah keduanya berisi muatan maksimum) yang membuat jarum bergeser ≥ 2 mm tiap dm panjang jarum. Bahan &lt; 1 g ditimbang dengan timbangan miligram.</p>`},
+ {h:"Sebelum menimbang", html:`<ol><li>Meja datar (lihat waterpass, atur sekrup kaki).</li><li>Lengan timbangan datar, jarum tepat di tengah skala.</li><li>Piring seimbang (atur sekrup lawan).</li><li>Alasi kedua piring dengan kertas perkamen.</li><li><b>Anak timbangan di kiri, bahan di kanan.</b></li></ol>`},
+ {h:"Di atas apa bahan ditimbang?", html:`<div class="tw"><table class="t"><thead><tr><th>Jenis bahan</th><th>Wadah/cara</th><th>Contoh</th></tr></thead><tbody>
+  <tr><td>Kristal &amp; higroskopis</td><td>gelas arloji</td><td>fenol kristal, kalsium bromida</td></tr>
+  <tr><td>Lembek/setengah padat</td><td>kertas perkamen</td><td>vaselin, adeps</td></tr>
+  <tr><td>Cair</td><td>cawan penguap / erlenmeyer</td><td>tingtur, ekstrak cair</td></tr>
+  <tr><td>Mudah menguap</td><td>tempat tertutup</td><td>amoniak, asam asetat, HCl pekat</td></tr>
+  <tr><td>Rusak oleh zat organik (oksidator)</td><td>gelas arloji + sendok porselen</td><td>KMnO₄, iodium, AgNO₃</td></tr>
+  <tr><td>Berbau keras</td><td>gelas arloji + sendok porselen</td><td>kamfer, mentol, timol, naftol</td></tr>
+  <tr><td>Ekstrak kental (spissum)</td><td>perkamen yang dioles parafin cair</td><td>ekstrak belladon, ichthyol</td></tr>
+ </tbody></table></div>`},
+ {h:"Pengenceran (pemicikan) bahan padat", html:`<p>Batas penimbangan terendah = <b>50 mg</b>. Hitung dulu <b>total</b> bahan yang harus ditimbang untuk seluruh resep; jika &lt; 50 mg, encerkan dengan Saccharum lactis (SL).</p>
+ <div class="tw"><table class="t"><thead><tr><th>Jumlah bahan</th><th>Cara</th><th>Ambil hasil pengenceran</th></tr></thead><tbody>
+  <tr><td class="n">10–50 mg</td><td>1:10 → 50 mg obat + 450 mg SL = 500 mg</td><td class="n">(perlu/50) × 500 mg</td></tr>
+  <tr><td class="n">1–10 mg</td><td>1:50 → 50 mg obat + 2450 mg SL = 2500 mg</td><td class="n">(perlu/50) × 2500 mg</td></tr>
+  <tr><td class="n">0,1–1 mg</td><td>bertingkat (dua kali pengenceran)</td><td>lihat contoh B12</td></tr></tbody></table></div>
+ <h4>Contoh slide</h4>
+ <ul><li><b>Captopril 20 mg</b>: 50 mg + SL 450 mg, gerus homogen, ambil 200 mg (berisi 20 mg).</li>
+ <li><b>CTM 5 mg</b>: 50 mg + SL 2450 mg, ambil 250 mg (berisi 5 mg).</li>
+ <li><b>Vit. B12 0,5 mg</b>: Pengenceran I 1:10 (50 + 450 = 500 mg). Ambil 50 mg (berisi 5 mg B12) + SL 950 mg = 1000 mg. Ambil 0,5/5 × 1000 = <b>100 mg</b>.</li></ul>
+ <h4>Pengenceran cair</h4>
+ <p>Larutkan 50 mg obat sampai 10 ml. Ambil (perlu/50) × 10 ml. Contoh: 25 mg → 5 ml.</p>`},
+ {h:"Cek ke dosen", cls:"flag", html:`<p>Di slide, langkah terakhir contoh B12 tertulis <span class="mono">HP2 = 0,5/5 × 500 = 50 mg</span>. Karena total pengenceran kedua 1000 mg (50 + 950), hitungan yang konsisten adalah 0,5/5 × 1000 = 100 mg. Tanyakan versi mana yang dipakai saat ujian.</p>`},
+ ],
+ traps:["Pengenceran ditentukan dari <b>jumlah total</b> yang ditimbang untuk seluruh resep, bukan dosis per bungkus.",
+        "Anak timbangan di <b>kiri</b>, bahan di <b>kanan</b>.",
+        "SL dari hasil pengenceran ikut dihitung sebagai pengisi, jadi kurangi jumlah SL q.s. yang ditambahkan."],
+ cards:[
+  ["Batas penimbangan terendah","50 mg. Kurang dari itu: encerkan."],
+  ["Kepekaan timbangan miligram","5 mg (daya beban 10–50 g)."],
+  ["Kepekaan timbangan gram halus","50 mg (daya beban 100–200 g)."],
+  ["Kepekaan timbangan gram kasar","200 mg (daya beban 250–1000 g)."],
+  ["Bahan 10–50 mg","Pengenceran 1:10 → 50 mg obat + 450 mg SL = 500 mg."],
+  ["Bahan 1–10 mg","Pengenceran 1:50 → 50 mg obat + 2450 mg SL = 2500 mg."],
+  ["Bahan 0,1–1 mg","Pengenceran bertingkat (dua kali)."],
+  ["Posisi anak timbangan","Kiri. Bahan di kanan."],
+  ["Menimbang KMnO₄ / iodium","Gelas arloji + sendok porselen (rusak oleh zat organik)."],
+  ["Menimbang ekstrak kental","Di atas perkamen yang dioles parafin cair."],
+  ["Menimbang vaselin/adeps","Di atas kertas perkamen."],
+  ["Menimbang bahan mudah menguap","Dalam tempat tertutup (amoniak, asam asetat, HCl pekat)."],
+  ["Kamfer, mentol, timol ditimbang di","Gelas arloji + sendok porselen (bau keras)."],
+  ["Pengenceran cair","50 mg dilarutkan ad 10 ml; ambil (perlu/50) × 10 ml."],
+ ]},
+/* ---------------- 5 ---------------- */
+{id:"t5", fase:"UTS", no:5, title:"Pulvis & Pulveres (Serbuk)",
+ short:"Derajat halus, cara menyerbukkan bahan khusus, mencampur, menulis & membagi puyer.",
+ src:"PO Pulvis et Pulveres (1).pdf · Pulvis et Pulveres (Powders).pptx · sediaan.pdf", tools:["tablet","qs"], cases:["c1","c2"],
+ blocks:[
+ {h:"Definisi, untung, rugi", html:`<p><b>Pulvis</b>: serbuk halus, kering, homogen; tunggal atau campuran. <b>Pulveres</b>: serbuk yang dibagi-bagi, dibungkus untuk sekali minum (obat dalam).</p>
+ <div class="cols"><div><h4>Keuntungan</h4><ul><li>Bisa dicampur makanan/minuman (anak, lansia)</li><li>Dosis disiapkan individual</li><li>Onset cepat (tanpa proses disintegrasi)</li></ul></div>
+ <div><h4>Kerugian</h4><ul><li>Rasa &amp; bau tidak enak</li><li>Luas permukaan besar → mudah lembap/menyerap gas</li></ul></div></div>`},
+ {h:"Derajat halus serbuk (FI III)", html:`<div class="tw"><table class="t"><thead><tr><th>Derajat</th><th>Nomor</th></tr></thead><tbody>
+  <tr><td>Sangat kasar</td><td class="n">5/8</td></tr><tr><td>Kasar</td><td class="n">10/40</td></tr><tr><td>Agak kasar</td><td class="n">22/60</td></tr><tr><td>Agak halus</td><td class="n">44/85</td></tr><tr><td>Halus</td><td class="n">85</td></tr><tr><td>Sangat halus</td><td class="n">120</td></tr><tr><td>Sangat halus sekali</td><td class="n">200/300</td></tr></tbody></table></div>
+ <p>Satu nomor: semua serbuk lewat pengayak itu. Dua nomor (mis. 10/22): <b>semua lewat nomor terendah</b>, dan <b>tidak lebih dari 40% lewat nomor tertinggi</b>. Nomor = jumlah lubang tiap 2,54 cm.</p>`},
+ {h:"Mencampur: teknik doubling-up", html:`<ol><li>Mulai dari serbuk berjumlah paling kecil (A).</li><li>Tambahkan serbuk B sama banyak, gerus homogen.</li><li>Tambahkan lagi B sebanyak campuran di lumpang, gerus. Ulangi sampai B habis.</li><li>Lanjutkan dengan C, D, E dengan cara yang sama.</li></ol>
+ <ul><li><b>Obat keras (DM kecil)</b>: lumpang dialasi SL sama banyak dengan obat, baru obat digerus; bila perlu tambah pewarna kontras.</li>
+ <li><b>Sb₂S₅</b> (oranye, lengket di pori lumpang): digilas di antara dua lapis SL.</li>
+ <li><b>Kristal rapuh</b> (kinin sulfat, kinin HCl, asam salisilat): jangan digerus sendiri, gerus bersama serbuk lain.</li></ul>`},
+ {h:"Menyerbukkan bahan khusus", html:`<div class="tw"><table class="t"><thead><tr><th>Bahan</th><th>Cara</th></tr></thead><tbody>
+  <tr><td>Kamfer (licin, kaku)</td><td>Tetesi spiritus fortior (±20 tetes/g), aduk pelan sampai kering; campur pengisi (SL/sulfur ppt) supaya tidak menggumpal. Untuk obat luar boleh eter.</td></tr>
+  <tr><td>Asam salisilat (ringan, mudah terbang)</td><td>Basahi etanol 96%, lalu gerus.</td></tr>
+  <tr><td>Asam benzoat &amp; β-naftol (kristal licin)</td><td>Basahi etanol 96%, lalu gerus.</td></tr>
+  <tr><td>NH₄Cl, fenobarbital Na (higroskopis)</td><td>Gerus di lumpang hangat.</td></tr>
+  <tr><td>Minyak atsiri</td><td>Buat <b>elaeosaccharum</b>: 2 g gula + 1 tetes minyak, selalu dibuat baru. Daerah tropis: gula diganti SL.</td></tr>
+  <tr><td>Tingtur (pelarut, zat tidak menguap)</td><td>Uapkan di waterbath sampai kental sirop, tambah SL, keringkan. Jumlah sedikit: cukup di lumpang panas.</td></tr>
+  <tr><td>Tingtur zat mudah menguap, komposisi diketahui</td><td>Ambil zat berkhasiatnya saja (mis. tinctura opii benzoica).</td></tr>
+  <tr><td>Tingtur, komposisi tidak diketahui (tct. valerianae)</td><td>≤ 2 tetes per 1 g SL: masukkan terakhir. Lebih banyak: jadikan tetes/potio.</td></tr>
+  <tr><td>Extractum siccum (kering)</td><td>Gerus di lumpang yang dilapisi SL.</td></tr>
+  <tr><td>Extractum spissum (kental)</td><td>Encerkan di lumpang panas dengan spiritus 90% sampai kental sirup, tambah SL, aduk sampai kering.</td></tr>
+  <tr><td>Extractum liquidum (cair)</td><td>Seperti tingtur (waterbath + SL), atau ganti dengan ekstrak keringnya (rhamni purshianae: 25%).</td></tr>
+  <tr><td>Garam berair kristal (tawas, MgSO₄·7H₂O)</td><td>Ganti garam eksikatus. Tawas hidrat → 67% tawas eksikatus.</td></tr>
+ </tbody></table></div>
+ <p class="muted">Spiritus fortior = etanol 96% · spiritus = etanol 90% · spiritus dilutus = etanol 70%.</p>`},
+ {h:"Pulveres: menulis, menimbang, membagi, mengemas", html:`<ul>
+  <li>Dua cara menulis: <span class="mono">m.f. pulv. No. XV</span> (jumlah total, dibagi) atau <span class="mono">m.f. pulv. d.t.d. No. XV</span> (jumlah per bungkus).</li>
+  <li>Bobot per bungkus 300 mg–1 g; biasanya 500 mg. Catatan arsip Bu Yaya: anak 300 mg, dewasa 500 mg.</li>
+  <li>Pembawa: Saccharum lactis; untuk bayi glukosa/dekstrosa. Korigen: warna (karmin, kakao), bau (ol. menthae pip.), rasa (gula).</li>
+  <li><b>Membagi</b>: &lt; 10 bungkus dibagi visual · &gt; 10 bungkus ditimbang dibagi dua dulu, lalu visual · jika % DM sekali &amp; sehari &gt; 80%, ditimbang satu per satu.</li>
+  <li><b>Kemasan</b>: kertas perkamen lalu kotak karton. Jika berisi minyak atsiri, kamfer, atau zat higroskopis: tetap perkamen, diserahkan dalam botol bermulut lebar tertutup.</li>
+ </ul>`},
+ ],
+ traps:["Soal arsip: “12 bungkus dibagi visual” → <b>Salah</b>. Lebih dari 10 bungkus dibagi dua dengan timbangan dulu.",
+        "Ekstrak <b>kental</b> (belladon) tidak diuapkan di waterbath; ia diencerkan di lumpang panas dengan spiritus. Yang diuapkan di waterbath: tingtur dan ekstrak cair.",
+        "Cera alba adalah bahan salep, bukan basis serbuk.",
+        "Asam askorbat tidak termasuk bahan yang dibasahi spiritus fortior sebelum digerus."],
+ cards:[
+  ["Derajat halus 44/85","Agak halus."],["Derajat halus 10/40","Kasar."],["Derajat halus 22/60","Agak kasar."],["Derajat halus 85","Halus."],["Derajat halus 120","Sangat halus."],
+  ["Arti 10/22","Semua serbuk lewat ayakan no. 10, dan tidak lebih dari 40% lewat no. 22."],
+  ["Spiritus fortior / spiritus / dilutus","96% / 90% / 70% etanol."],
+  ["Elaeosaccharum","2 g gula (di tropis: SL) + 1 tetes minyak atsiri, dibuat baru (r.p.)."],
+  ["Menyerbukkan kamfer","Tetesi spiritus fortior ±20 tetes/g, aduk pelan sampai kering, tambah pengisi."],
+  ["Ekstrak kering (siccum)","Gerus di lumpang yang dilapisi SL."],
+  ["Ekstrak kental (spissum)","Lumpang panas + spiritus 90% sampai kental sirup, tambah SL, aduk sampai kering."],
+  ["Ekstrak cair (liquidum)","Seperti tingtur: uapkan di waterbath, tambah SL. Atau ganti ekstrak keringnya."],
+  ["Tawas hidrat diganti","67% tawas eksikatus."],
+  ["Sb₂S₅","Digilas di antara dua lapis SL (lengket di pori lumpang)."],
+  ["Membagi puyer > 10 bungkus","Timbang, bagi dua sama berat, lalu bagi visual."],
+  ["Membagi puyer bila DM > 80%","Timbang satu per satu."],
+  ["Teknik doubling-up","Mulai bahan paling sedikit, tambah bahan lain sama banyak, gerus, ulangi."],
+  ["Puyer mengandung minyak atsiri/kamfer","Bungkus perkamen, serahkan dalam botol mulut lebar tertutup."],
+  ["Pembawa puyer bayi","Glukosa/dekstrosa (dewasa/anak: Saccharum lactis)."],
+ ]},
+/* ---------------- 6 ---------------- */
+{id:"t6", fase:"UAS", no:6, title:"Pulvis Adspersorius (Bedak Tabur)",
+ short:"Syarat fisik, basis & pelincir, cara mengerjakan bahan khusus, serbuk efflorescent & effervescent.",
+ src:"Pulvis Adspersorius (Bedak Tabur).pptx", tools:[], cases:[],
+ blocks:[
+ {h:"Persyaratan", html:`<ul>
+  <li>Partikel halus dan seragam, tidak mengiritasi, mudah dioleskan, sifat alir baik.</li>
+  <li>Lewat <b>mesh 100 (ayakan B40)</b>; yang mengandung lemak cukup <b>B30</b>.</li>
+  <li>Luas permukaan besar → menyerap keringat, terasa dingin.</li>
+  <li>Bahan yang menyerap air <b>tidak boleh</b> untuk luka terbuka/basah (mengeras). Bahan hidrofob mencegah kehilangan air.</li>
+  <li>Talkum untuk luka terbuka harus disterilkan dulu.</li>
+  <li>Wadah bertutup ayakan. Tidak boleh berisi zat toksik/berkhasiat sistemik.</li>
+ </ul>
+ <p><b>Basis</b>: pati jagung, talkum, bolus alba. <b>Pelincir</b>: Mg, Ca, atau Zn stearat. Plus zat aktif dan parfum.</p>`},
+ {h:"Mengerjakan bahan khusus", html:`<div class="tw"><table class="t"><thead><tr><th>Bahan</th><th>Cara</th></tr></thead><tbody>
+  <tr><td>Kamfer, mentol, timol</td><td>Larutkan dalam eter/spiritus fortior, tambah pengisi sampai kering &amp; halus.</td></tr>
+  <tr><td>Balsamum peruvianum</td><td>Larutkan dalam spiritus fortior sampai kental sirop, tambah pengisi, aduk sampai kering.</td></tr>
+  <tr><td>Ichthyol, tumenol amonium</td><td>Seperti balsam peru; bila perlu diuapkan di waterbath.</td></tr>
+  <tr><td>Cetaceum, parafin padat, vaselin</td><td>Diiris/diparut. Sedikit: larutkan dalam eter. Banyak: lebur di lumpang panas. Lalu tambah pengisi.</td></tr>
+  <tr><td>Adeps lanae</td><td>Sedikit: larutkan dalam <b>aseton atau eter</b>. Banyak: lebur di lumpang panas.</td></tr>
+  <tr><td>Formalin</td><td>Sedikit: dicampur <b>terakhir setelah diayak</b>, 2 tetes per gram serbuk. Banyak: ganti <b>1/3 beratnya</b> dengan paraformaldehid, sisa 2/3 diganti pengisi.</td></tr>
+  <tr><td>Minyak atsiri (ol. rosarum, ol. lavandulae)</td><td>Dicampur terakhir setelah diayak.</td></tr>
+ </tbody></table></div>`},
+ {h:"Efflorescent, effervescent, eutektik", html:`<ul>
+  <li><b>Serbuk efflorescent</b>: kristal berair kristal yang melepas air → serbuk basah &amp; lengket. Pakai garam anhidratnya. Contoh: atropin sulfat, kafein, kodein (fosfat/sulfat), kinin HCl, skopolamin HBr.</li>
+  <li><b>Garam effervescent</b>: asam sitrat/tartrat + natrium bifosfat/karbonat. Dipanaskan di oven 95–105 °C sampai lembek, diayak mesh 10, dikeringkan, simpan kering.</li>
+  <li><b>Mentol + kamfer</b> membentuk campuran eutektik (cair). Campurkan dengan serbuk sedikit demi sedikit (sama banyak, dst.).</li>
+ </ul>
+ <p class="muted">Contoh bulk oral: Dekstrosa 25 g, NaCl 2,5 g, K sitrat 4,5 g untuk 1 L air. Contoh bulk topikal: mentol 0,1 · kamfer 0,2 · Zn stearat 0,8 · ZnO 8 · talkum 31 g.</p>`},
+ ],
+ traps:["Arsip UTS Bu Yaya juga menanyakan bedak tabur. Jangan dilewati walau masuk fase UAS di roadmap ini.",
+        "Adeps lanae sedikit dilarutkan dalam <b>aseton/eter</b>, bukan etanol.",
+        "Formalin banyak diganti <b>1/3</b> beratnya (bukan 1/4) dengan paraformaldehid, kekurangan 2/3 diganti pengisi."],
+ cards:[
+  ["Derajat halus bedak tabur","Mesh 100 (ayakan B40); berlemak B30."],
+  ["Basis bedak tabur","Pati jagung, talkum, bolus alba."],
+  ["Pelincir bedak tabur","Mg stearat, Ca stearat, Zn stearat."],
+  ["Formalin jumlah sedikit","Dicampur terakhir setelah diayak, 2 tetes/g serbuk."],
+  ["Formalin jumlah banyak","Ganti 1/3 beratnya dengan paraformaldehid; 2/3 sisanya pengisi."],
+  ["Adeps lanae jumlah sedikit","Larutkan dalam aseton atau eter, tambah pengisi."],
+  ["Talkum untuk luka terbuka","Harus disterilkan dulu."],
+  ["Serbuk efflorescent","Kristal berair kristal; pakai garam anhidrat. Contoh: atropin sulfat, kafein, kodein."],
+  ["Garam effervescent","Oven 95–105 °C, ayak mesh 10, keringkan, simpan kering."],
+  ["Minyak atsiri di bedak tabur","Dicampur terakhir setelah diayak."],
+ ]},
+/* ---------------- 7 ---------------- */
+{id:"t7", fase:"UAS", no:7, title:"Kapsul",
+ short:"Kapsul keras vs lunak, gelatin, ukuran & kapasitas, Aturan Tujuh, meracik dari tablet.",
+ src:"KAPSUL.pdf · PO CAPSULES.pptx / .pdf · sediaan.pdf", tools:["kapsul","tablet"], cases:["c1","c6"],
+ blocks:[
+ {h:"Kapsul keras vs kapsul lunak", html:`<div class="tw"><table class="t"><thead><tr><th>Kapsul gelatin keras</th><th>Kapsul gelatin lunak</th></tr></thead><tbody>
+  <tr><td>Silinder; dua bagian: badan &amp; tutup</td><td>Bulat, oval, lonjong; satu kesatuan</td></tr>
+  <tr><td>Gelatin, pewarna, plasticizer, titanium dioksida</td><td>Gelatin, plasticizer (gliserin, sorbitol), pengawet</td></tr>
+  <tr><td>Isi serbuk/butiran</td><td>Isi cairan, suspensi, minyak (vit. A, D, E, K)</td></tr>
+  <tr><td>Disegel setelah diisi</td><td>Diisi dan disegel bersamaan</td></tr>
+ </tbody></table></div>
+ <ul><li>Kapsul keras mengandung air 12–16%. Terlalu kering → rapuh; terlalu lembap → lembek &amp; lengket.</li>
+ <li><b>Gelatin tipe A</b>: kulit babi, hidrolisis asam, titik isoelektrik 7–9. <b>Tipe B</b>: tulang sapi, hidrolisis basa, titik isoelektrik 4,8–5.</li>
+ <li>Kekuatan <b>Bloom</b> yang cocok untuk kapsul: 150–280 g.</li></ul>`},
+ {h:"Tidak cocok dibuat kapsul", html:`<ul><li>Garam yang sangat mudah larut (KCl, KBr, NH₄Cl): larutan pekat di lambung → mual, muntah, iritasi.</li><li>Bahan yang sangat <i>efflorescent</i>: melunakkan cangkang.</li></ul>`},
+ {h:"Ukuran & Aturan Tujuh", html:`<div class="capsviz" aria-hidden="true" id="capsvizStatic"></div>
+ <div class="tw"><table class="t"><thead><tr><th>Nomor</th><th>000</th><th>00</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th></tr></thead><tbody>
+  <tr><td>Kapasitas (ml)</td><td class="n">1,36</td><td class="n">0,95</td><td class="n">0,67</td><td class="n">0,50</td><td class="n">0,37</td><td class="n">0,30</td><td class="n">0,21</td><td class="n">0,12</td></tr>
+  <tr><td>Bobot serbuk (slide sediaan)</td><td class="n">1040</td><td class="n">650</td><td class="n">520</td><td class="n">325</td><td class="n">260</td><td class="n">195</td><td class="n">—</td><td class="n">—</td></tr></tbody></table></div>
+ <p>Kapsul bisa diisi 65–1000 mg serbuk; kapasitas tergantung kerapatan serbuk.</p>
+ <h4>Aturan Tujuh (Rule of Seven)</h4>
+ <ol><li>Ubah bobot serbuk per kapsul ke grain (1 grain = 65 mg).</li><li>Hitung 7 − grain.</li><li>Cocokkan: −3 → 000 · −2 → 00 · −1 → 0 · 1 → 1 · 2 → 2 · 3 → 3 · 4 → 4 · 5 → 5.</li></ol>
+ <div class="formula">325 mg = 5 grain → 7 − 5 = 2 → kapsul no. 2</div>`},
+ {h:"Meracik kapsul dari tablet", html:`<p>Hitung jumlah tablet = (dosis per kapsul × jumlah kapsul) ÷ kekuatan tablet. Bobot serbuk yang ditimbang = jumlah tablet × bobot 1 tablet. Bobot per kapsul = total serbuk ÷ jumlah kapsul → pilih nomor kapsul.</p>
+ <div class="formula">Contoh arsip: kodein ½ tab × 12 = 6 tab (600 mg) · pamol ⅕ × 12 = 2,4 tab (1680 mg) · efedrin 120 mg → 2400 mg / 12 = 200 mg → kapsul no. 4</div>
+ <p class="muted">Tablet pecahan (2,4 tablet): gerus 3 tablet, timbang serbuk sesuai bagian (2,4 × 700 = 1680 mg).</p>`},
+ {h:"Pembuatan cangkang kapsul keras (8 langkah)", html:`<ol><li>Membuat larutan gelatin (larutan pencelup), 30–40% b/b, 60–70 °C, vakum untuk buang gelembung.</li><li>Pin logam dicelup ke larutan gelatin.</li><li>Pin dirotasi supaya lapisan merata.</li><li>Pengeringan pin berlapis gelatin.</li><li>Pengupasan &amp; pemangkasan.</li><li>Penyambungan badan &amp; tutup.</li><li>Penyortiran (kadar air keluar mesin 15–18%).</li><li>Pencetakan identitas.</li></ol>`},
+ ],
+ traps:["Hitung bobot <b>serbuk tablet</b> (pakai bobot tablet), bukan kandungan zat aktifnya, untuk memilih nomor kapsul.",
+        "Cephalexin 500 mg 3×1 selama 10 hari, apotek punya 250 mg → 60 kapsul total, 2 kapsul sekali, 6 sehari.",
+        "Hasil Aturan Tujuh dibulatkan ke angka terdekat: 7 − 3,08 = 3,92 → kapsul no. 4."],
+ cards:[
+  ["1 grain = ... mg","65 mg."],
+  ["Aturan Tujuh","Bobot per kapsul → grain; 7 − grain; cocokkan dengan nomor kapsul."],
+  ["7 − grain = −1","Kapsul no. 0."],
+  ["7 − grain = −3","Kapsul no. 000."],
+  ["Kapasitas kapsul no. 0","0,67 ml."],
+  ["Kapasitas kapsul no. 000","1,36 ml (terbesar). No. 5 terkecil: 0,12 ml."],
+  ["Kadar air kapsul keras","12–16%."],
+  ["Gelatin tipe A","Kulit babi, hidrolisis asam, titik isoelektrik 7–9."],
+  ["Gelatin tipe B","Tulang sapi, hidrolisis basa, titik isoelektrik 4,8–5."],
+  ["Kekuatan Bloom kapsul","150–280 g."],
+  ["Tidak cocok untuk kapsul","Garam sangat larut (KCl, KBr, NH₄Cl) dan bahan efflorescent."],
+  ["Isi kapsul lunak","Cairan, suspensi, minyak, larutan obat dalam minyak (vit. A, D, E, K)."],
+  ["da in caps.","Masukkan ke dalam kapsul."],
+  ["Kapasitas serbuk kapsul","65–1000 mg."],
+ ]},
+/* ---------------- 8 ---------------- */
+{id:"t8", fase:"UAS", no:8, title:"Pilulae (Pil)",
+ short:"Eksipien pil, cara membuat masa pil, kasus khusus, penyalutan, syarat FI III.",
+ src:"PERACIKAN OBAT (Pilulae).pptx — Rahmi Nofita R.", tools:["pil"], cases:["c7"],
+ blocks:[
+ {h:"Definisi", html:`<ul><li>Pil: bulat seperti kelereng, <b>100–500 mg</b>, berisi satu atau lebih bahan obat.</li><li><b>Granula</b>: pil kecil ±30 mg; bila tidak disebut lain berisi 1 mg zat berkhasiat. Dibuat dari 22 mg sacch. pulv. + 3 mg pulvis gummosus per granul (atau 5 mg succus + 20 mg radix).</li><li><b>Boli</b>: pil besar &gt; 500 mg, untuk hewan.</li></ul>`},
+ {h:"Empat zat tambahan", html:`<div class="tw"><table class="t"><thead><tr><th>Fungsi</th><th>Contoh</th></tr></thead><tbody>
+  <tr><td><b>Pengisi</b> (memperbesar volume)</td><td>Liquiritiae radix, Saccharum lactis; oksidator: bolus alba; pulvis pro pilulis (succus + radix sama banyak)</td></tr>
+  <tr><td><b>Pengikat</b></td><td>Succus liquiritiae, PGA, tragakan, pulvis gummosus (PGA + tragakan + gula sama banyak), ol. cacao, adeps lanae, vaselin</td></tr>
+  <tr><td><b>Pembasah</b></td><td>Air, gliserol, sirop, madu, <b>aqua glycerinata</b></td></tr>
+  <tr><td><b>Penyalut</b> (bila perlu)</td><td>Perak, balsamum tolutanum, shellak, kolodium, salol, gelatin, gula</td></tr></tbody></table></div>`},
+ {h:"Cara membuat & angka patokan", html:`<ol><li>Haluskan (bila perlu ayak) zat aktif, pengisi, pengikat; campur homogen.</li><li>Tetesi pembasah (biasanya aqua glycerinata), gerus sambil ditekan sampai masa plastis.</li><li>Gulung jadi batang di papan pil, potong (papan 30 kanal), gelindingkan sampai bulat. Tabur lycopodium supaya tidak lengket.</li></ol>
+ <ul><li>Aqua glycerinata <b>mencegah pil mengeras</b> selama penyimpanan (gliserin tidak menguap). Jangan berlebih, pil jadi lembek.</li>
+ <li>Succus liquiritiae: <b>2 g untuk 60 pil</b> (= 1 g/30 pil). Pil normal ≈ 125 mg serbuk tumbuhan.</li>
+ <li>Garam berat: KI dihitung ⅓ beratnya, garam Fe ⅕ beratnya (setara volume serbuk tumbuhan).</li>
+ <li>Pulvis gummosus 300 mg untuk 30 pil; bahan voluminous ±1 g untuk 30 pil.</li>
+ <li>Obat cair sedikit: radix ±2 g + succus 1 g untuk 30 pil.</li></ul>`},
+ {h:"Kasus khusus yang sering keluar", html:`<div class="tw"><table class="t"><thead><tr><th>Kasus</th><th>Penanganan</th></tr></thead><tbody>
+  <tr><td>Oksidator (AgNO₃, KMnO₄)</td><td>Pengisi bolus alba 100 mg/pil; pengikat adeps lanae/vaselin ±⅙ berat zat padat.</td></tr>
+  <tr><td>Ekstrak kental</td><td>Rendam dengan <b>spiritus dilutus</b>; pengisi radix; succus 1 g/30 pil (dikurangi jika ekstrak &gt; 1,5 g).</td></tr>
+  <tr><td>Higroskopis (KBr, KI, Na salisilat)</td><td>Gerus halus di mortir panas; succus + radix 1,5 g per 7 g garam; <b>jangan aqua glycerinata</b>.</td></tr>
+  <tr><td>Sangat higroskopis (CaBr₂, CaCl₂, K asetat)</td><td>Pakai larutannya: sol. K asetat 33⅓%, CaBr₂ 25%, CaCl₂ 25%, FeCl₃ 75% (FeCl₃ jangan diuapkan).</td></tr>
+  <tr><td>Kodein basa + garam amonium/ichthammol</td><td>Terbentuk gas NH₃ → pil pecah.</td></tr>
+  <tr><td>Fe reductum + asam sitrat; FeCO₃ + asam</td><td>Gas H₂ / CO₂ → pakai pembasah bebas air.</td></tr>
+  <tr><td>Pengikat asam (succus, ekstrak gentian) + Fe atau NaHCO₃</td><td>Netralkan dulu dengan MgO 50 mg per gram ekstrak/succus.</td></tr>
+  <tr><td>Difantoin Na</td><td>Succus 1 + amilum 3; jangan radix; pembasah sirupus simplex.</td></tr>
+  <tr><td>Digitalis folia (rusak oleh air)</td><td>Pengikat oleum cacao.</td></tr>
+  <tr><td>Minyak eteris, kreosot, balsam</td><td>Emulsikan dulu. Metode Blomberg (gliserin + radix) atau metode succus + gliserin (kreosot: ½ × beratnya).</td></tr>
+  <tr><td>Kinin sulfat</td><td>Coklat: succus + gula, digulung dengan lycopodium. Putih: pulvis gummosus + gula, digulung dengan talk.</td></tr>
+  <tr><td>Ekstrak kering</td><td>Aloe, frangula, rhamni, rhei: radix + aqua glycerinata. Cinchonae, colae: pengikat succus.</td></tr>
+ </tbody></table></div>`},
+ {h:"Penyalutan & syarat FI III", html:`<ul><li><b>Cegah oksidasi</b>: balsamum tolutanum 1 bagian dalam 9 bagian kloroform; pil disiram, dikocok dalam botol mulut lebar, digerakkan di piring sampai kering.</li>
+ <li><b>Enterik</b> ("fac pilulas nonsolubiles in succo gastrico"): dua lapis shellak.</li>
+ <li><b>Keseragaman bobot</b> (timbang 20 pil): bobot rata-rata 100–250 mg → maks. 2 pil menyimpang &gt; 10%, tidak satu pun &gt; 20%. Bobot 250–500 mg → 7,5% dan 15%.</li>
+ <li><b>Waktu hancur</b> (36–38 °C): tidak bersalut 15 menit; bersalut 60 menit. Enterik: HCl 0,06 N 3 jam, lalu dapar pH 6,8 hancur dalam 60 menit.</li></ul>`},
+ ],
+ traps:["Granula ±30 mg, boli &gt; 500 mg. Soal sering menukar keduanya.",
+        "Pil higroskopis: pembasahnya <b>jangan</b> aqua glycerinata.",
+        "Ekstrak kental pada pil direndam <b>spiritus dilutus</b> (bukan fortior, bukan air)."],
+ cards:[
+  ["Bobot pil","100–500 mg."],["Granula","Pil kecil ±30 mg, berisi 1 mg zat berkhasiat (bila tidak disebut lain)."],["Boli","Pil besar > 500 mg, untuk hewan."],
+  ["4 zat tambahan pil","Pengisi, pengikat, pembasah, penyalut (bila perlu)."],
+  ["Fungsi lain aqua glycerinata","Mencegah pil mengeras selama penyimpanan."],
+  ["Succus liquiritiae untuk 30 pil","1 g (2 g untuk 60 pil)."],
+  ["Pengisi untuk oksidator","Bolus alba (100 mg/pil); pengikat adeps lanae/vaselin ±1/6 zat padat."],
+  ["Pil higroskopis (KBr, KI, Na salisilat)","Mortir panas; succus + radix 1,5 g per 7 g garam; jangan aqua glycerinata."],
+  ["Ekstrak kental pada pil","Direndam spiritus dilutus."],
+  ["Kodein + NH₄Cl dalam pil","Gas NH₃ → pil pecah."],
+  ["Penyalut cegah oksidasi","Balsamum tolutanum 1 : 9 kloroform."],
+  ["Penyalut enterik pil","Dua lapis shellak."],
+  ["Waktu hancur pil tidak bersalut","15 menit (bersalut 60 menit)."],
+  ["Sol. Kalii acetatis","33⅓% kalium asetat."],
+  ["Difantoin Na","Succus 1 + amilum 3, tanpa radix, pembasah sirupus simplex."],
+  ["Lycopodium","Ditaburkan di papan supaya masa pil tidak lengket."],
+ ]},
+/* ---------------- 9 ---------------- */
+{id:"t9", fase:"UAS", no:9, title:"Unguentum (Salep I–III)",
+ short:"4 golongan basis, aturan umum pembuatan, peleburan, pasta, krim, salep mata, efek lokal.",
+ src:"PERACIKAN OBAT (unguentum I, II, III).pptx — Rahmi Nofita R.", tools:["unit"], cases:["c4","c5"],
+ blocks:[
+ {h:"Definisi salep (FI III)", html:`<p>Sediaan setengah padat yang mudah dioleskan, untuk obat luar. Bahan obat larut atau terdispersi homogen dalam basis yang cocok. <b>Tidak boleh berbau tengik.</b> Kadar bahan obat keras atau narkotika dinyatakan dalam <b>persentase</b>.</p>
+ <p>Uji homogenitas: oleskan pada kaca, susunannya harus homogen.</p>`},
+ {h:"Empat golongan dasar salep", html:`<div class="tw"><table class="t"><thead><tr><th>Golongan</th><th>Contoh</th><th>Sifat</th></tr></thead><tbody>
+  <tr><td><b>1. Hidrokarbon</b></td><td>Vaselin putih/kuning, vaselin + malam, parafin cair/padat, jelene, minyak tumbuhan</td><td>Berminyak, oklusif, sukar dicuci, hampir tak menyerap air</td></tr>
+  <tr><td><b>2. Serap</b></td><td>Adeps lanae, lanolin, unguentum simplex (cera flava 30 + ol. sesami 70), hydrophilic petrolatum</td><td>Menyerap air, berminyak</td></tr>
+  <tr><td><b>3. Dapat dicuci air</b></td><td>Vanishing cream (M/A), emulsifying ointment BP, emulsifying wax, hydrophilic ointment</td><td>Emulsi M/A, mudah dicuci</td></tr>
+  <tr><td><b>4. Larut air</b></td><td>Salep PEG (PEG 4000 40% + PEG 400 60%), tragakan, PGA</td><td>Bebas lemak, larut air</td></tr></tbody></table></div>
+ <ul><li>Lanolin = adeps lanae + <b>25% air</b>. Ungt. leniens 25% air; ungt. cetylicum hydrosum 40% air.</li>
+ <li>Vaselin hanya menyerap air ±5%. Ditambah kolesterol (Power, Leak &amp; Warner): 3% kolesterol → 250%; + kol. asetat 500% · + laurat 600% · + palmitat 700% · <b>+ stearat 800%</b> · isokolesterol 300% · + cetaceum/cera alba 500%.</li>
+ <li>Daya serap air per 100 bagian: adeps lanae 200 · lanolin 120 · vaselin 10 · vaselin + 5% cera 40 · vaselin + 5% adeps lanae 100 · vaselin + 5% kolesterol 250.</li>
+ <li>Jelene (Plastibase) jadi encer bila dicampur pix liquida, kamfer, mentol, gandapura.</li></ul>`},
+ {h:"Aturan umum pembuatan salep (I–IV)", html:`<div class="tw"><table class="t"><thead><tr><th>Aturan</th><th>Isi</th><th>Contoh</th></tr></thead><tbody>
+  <tr><td class="n">I</td><td>Zat yang <b>larut dalam basis</b>: dilarutkan, bila perlu dengan pemanasan rendah.</td><td>Kamfer, mentol, fenol, timol; efedrin basa</td></tr>
+  <tr><td class="n">II</td><td>Zat <b>mudah larut dalam air</b> &amp; stabil, basis mampu menyerap air: larutkan dalam air yang tersedia dulu.</td><td>KI (air dari lanolin), prokain HCl (aq. rosae)</td></tr>
+  <tr><td class="n">III</td><td>Zat <b>kurang/tidak larut</b>: serbukkan, ayak no. 100, gerus dengan basis sama berat.</td><td>ZnO, asam borat, sulfur</td></tr>
+  <tr><td class="n">IV</td><td>Salep dibuat dengan <b>peleburan</b>: aduk sampai dingin.</td><td>Basis cera + minyak</td></tr></tbody></table></div>
+ <h4>Detail per aturan</h4>
+ <ul>
+  <li>Kamfer: gerus dengan spiritus fortior/eter (2× berat kamfer) sampai larut, tambah basis sedikit demi sedikit sampai spiritus menguap. Di basis vaselin: gerus dengan vaselin sama banyak dulu.</li>
+  <li>Jangan ganti fenol dengan <i>phenolum liquefactum</i> (berisi air, menurunkan kerja). Metil salisilat bisa melarutkan mentol.</li>
+  <li>Garam alkaloid larut air; basanya (efedrin) larut minyak.</li>
+  <li>Iodum: larutkan KI dalam air, lalu iodum, lalu basis. Timbang iodum di antara dua kaca arloji, jangan pakai spatel logam.</li>
+  <li>Tanin sukar larut air: bila air kurang, serbukkan dan gerus dengan basis. Iodum/tanin + garam alkaloid dalam larutan → alkaloid mengendap, jadi campur terpisah dengan sebagian basis.</li>
+  <li>ZnO dan asam borat <b>selalu diayak dulu baru ditimbang</b>. Salep asam borat dibuat <b>tanpa pemanasan</b>.</li>
+  <li>Ekstrak kental digerus dengan sedikit air (basis dikurangi sebanyak air). Ratanhiae ext.: tabur di air sama banyak, diamkan ±15 menit. Protargol: tabur di air, ±30 menit.</li>
+  <li>Bila terpaksa menambah air, minta persetujuan dokter dan kurangi basis sebanyak air.</li>
+ </ul>`},
+ {h:"Peleburan & bahan dengan cara khusus", html:`<ul>
+  <li>Dilebur di cawan porselin, diaduk dengan batang gelas/spatel kayu; massa yang menempel dilepas dengan kertas film.</li>
+  <li>Bahan berair (lanolin) <b>tidak ikut dilebur</b>: ambil bagian lemaknya; air ditambahkan setelah massa dingin.</li>
+  <li>Bila bahan kotor: lelehan dikolir (disaring kasa); bahan dilebihkan 10–20%. Styrax: panaskan ≤ 75 °C, dilebihkan 100% (±50% hilang).</li>
+  <li><b>Oleum cacao</b> (polimorfi): bila &gt; 10%, lelehkan sebagian saja.</li>
+  <li><b>Sapo kalinus/viridis</b>: tidak dipanaskan, digerus dulu. Dengan asam salisilat keluar air → salep sangat lembek.</li>
+  <li><b>Colophonium</b>: digerus, ditaburkan di atas basis yang dilebur sampai larut.</li>
+  <li><b>Balsamum peruvianum</b>: tidak dipanaskan, ditambah terakhir pada basis dingin (gerus dulu dengan ol. ricini bila ada).</li>
+  <li><b>Ditambah terakhir pada basis dingin</b>: ichthammol, tumenol, pix lithanthracis, ol. fagi/juniperi empyreumaticum, ol. iecoris aselli, minyak atsiri, kamfer, mentol.</li>
+  <li><b>Gliserin</b>: sedikit → larutkan dalam air yang ada, lalu ke basis. Banyak → tambahkan sedikit demi sedikit ke salep yang sudah dingin.</li>
+  <li><b>Cairan alkoholis</b> (sukar diserap basis): tahan panas → uapkan sampai ±⅓, ganti berat yang hilang dengan basis. Tidak tahan panas &amp; kadar diketahui → ambil zat aktifnya saja, berat cairan diganti basis. Kadar tidak diketahui → panaskan serendah mungkin + kipas angin.</li>
+  <li>Mengurangi daya serap air basis: asam salisilat, resorsin, fenol, tanin, timol, ratanhiae ext., pix liquida.</li>
+  <li>Merkuri dilarang dalam kosmetik (Permenkes 1175/2010, BPOM 2011), kecuali 0,007% pada tata rias mata.</li>
+ </ul>`},
+ {h:"Pasta, salep pendingin, krim, dan lainnya", html:`<div class="tw"><table class="t"><thead><tr><th>Tipe</th><th>Ciri</th><th>Contoh</th></tr></thead><tbody>
+  <tr><td>Pasta berlemak</td><td>&gt; 50% serbuk; basis vaselin/parafin cair; kaku, tidak meleleh pada suhu tubuh</td><td>Pasta zinci oxydi (ZnO 25, amylum 25, vaselin 50)</td></tr>
+  <tr><td>Pasta kering</td><td>Bebas lemak, ±60% serbuk; bentonit sebagai stabilisator; ichthammol/tumenol bikin encer; wadah kedap</td><td>Bentonit, sulfur, ZnO, talk, ichthammol, gliserin, air</td></tr>
+  <tr><td>Pasta pendingin</td><td>Serbuk + minyak lemak + cairan berair</td><td>Salep tiga dara: ZnO, ol. olivae, aqua calcis aa 10 → <b>A/M</b> (sabun Ca-oleat)</td></tr>
+  <tr><td>Salep pendingin</td><td>Kadar air tinggi; air menguap menyerap panas → sejuk</td><td>Unguentum leniens</td></tr>
+  <tr><td>Krim</td><td>Emulsi kental, ≥ 60% air; tipe A/M atau M/A</td><td>Vanishing cream (M/A, sabun → inkompatibel asam)</td></tr>
+  <tr><td>Mikstur gojog</td><td><b>Suspensi</b> zat padat dalam air/gliserin/alkohol, ±60% cairan; bentonit; botol mulut lebar, kocok dulu</td><td>ZnO, talk, gliserin, bentonit, air, spir. dil.</td></tr>
+  <tr><td>Salep mata (oculenta)</td><td>Oculentum simplex: cetyl alc. 2,5 · adeps lanae 6 · vaselin 51,5 · parafin cair ad 100; atau PEG 400 + 4000 aa</td><td>Hidrokortison asetat, sulfadimidin</td></tr></tbody></table></div>
+ <div class="cols"><div><h4>Pengemulsi krim A/M</h4><p>Sabun polivalen, span, adeps lanae, kolesterol, cera.</p></div>
+ <div><h4>Pengemulsi krim M/A</h4><p>Sabun monovalen (TEA-stearat, Na/K/NH₄ stearat), tween, Na lauril sulfat, kuning telur, gelatin, kasein, CMC, pektin, emulgid.</p></div></div>
+ <p>Penstabil krim: antioksidan dan pengawet (nipagin 0,12–0,18%, nipasol 0,02–0,05%). Linimentum calcis → A/M; linimentum ammoniae → M/A (sabun amonia monovalen).</p>`},
+ {h:"Efek obat lokal pada kulit", html:`<div class="tw"><table class="t"><thead><tr><th>Efek</th><th>Contoh &amp; kadar</th></tr></thead><tbody>
+  <tr><td>Antipruritik</td><td>Mentol 0,25% · fenol 0,5% · kamfer 2% · pix lithanthracis 2–10%</td></tr>
+  <tr><td>Keratoplastik (menebalkan lapisan tanduk)</td><td>Asam salisilat kadar rendah</td></tr>
+  <tr><td><b>Keratolitik</b> (melunakkan lapisan tanduk)</td><td>Asam salisilat 4–10% · resorsin 2–4% · sulfur 4–10% · TCA kadar tinggi</td></tr>
+  <tr><td>Antieksim</td><td>Asam borat 2% · pix lithanthracis 2–5% · hidrokortison asetat 0,5–1%</td></tr>
+  <tr><td>Antiparasit</td><td>Benzil benzoat 10–30% · eurax 10% · gameksan 1% · ungt. sulfuris</td></tr>
+  <tr><td>Antibakteri &amp; antijamur</td><td>Vioform 3% · basitrasin 500 U/g · tetrasiklin 3% · kloramfenikol 2–3% · nistatin 100.000 U/g</td></tr>
+  <tr><td>Antiseborea</td><td>Pix lithanthracis 1–5% · ichthammol 4–10%</td></tr></tbody></table></div>
+ <p>Antibiotik salep cepat rusak dalam air → pakai basis <b>anhidrat</b>. Penisilin: seluruh isi vial dipakai; contoh vial 500.000 U + vaselin ad 10 g → 50.000 U/g.</p>`},
+ ],
+ traps:["Lanolin 12 g berisi <b>3 ml</b> air (25%), bukan 4 ml.",
+        "Bahan berair seperti lanolin <b>tidak boleh</b> dilelehkan bersama basis lemak.",
+        "Salep tiga dara = emulsi <b>A/M</b>. Mikstur gojog = <b>suspensi</b>, bukan emulsi.",
+        "Kamfer → aturan I. Peleburan → aturan IV.",
+        "Kadar narkotika/obat keras dalam salep dinyatakan dalam <b>persen</b>, bukan miligram."],
+ cards:[
+  ["Golongan vaselin","Dasar salep hidrokarbon."],["Golongan adeps lanae, lanolin, ungt. simplex","Dasar salep serap."],["Golongan salep PEG","Dasar salep larut air."],
+  ["Unguentum simplex","Cera flava 30 + oleum sesami 70."],["Kadar air lanolin","25%."],
+  ["3% kolesterol + 3% kolesterol stearat","Vaselin mendukung air 800%."],["3% kolesterol saja","250%."],
+  ["Aturan umum I","Zat larut dalam basis → dilarutkan (pemanasan rendah). Contoh kamfer."],
+  ["Aturan umum II","Zat mudah larut air → larutkan dalam air yang tersedia dulu."],
+  ["Aturan umum III","Zat tidak larut → serbuk, ayak no. 100, gerus dengan basis sama berat."],
+  ["Aturan umum IV","Peleburan → aduk sampai dingin."],
+  ["ZnO & asam borat","Selalu diayak dulu baru ditimbang. Asam borat tanpa pemanasan."],
+  ["Ditambah terakhir pada basis dingin","Ichthammol, minyak atsiri, kamfer, mentol, bals. peru, ol. iecoris aselli, pix."],
+  ["Gliserin sedikit","Larutkan dalam air yang tersedia, baru ke basis."],
+  ["Pasta berlemak vs kering","Berlemak > 50% serbuk; kering bebas lemak ±60% serbuk."],
+  ["Salep tiga dara","ZnO, ol. olivae, aqua calcis aa → emulsi A/M (sabun Ca-oleat)."],
+  ["Mikstur gojog","Suspensi zat padat dalam cairan (±60% cairan), pensuspensi bentonit."],
+  ["Pengemulsi A/M","Sabun polivalen, span, adeps lanae, kolesterol, cera."],
+  ["Pengemulsi M/A","Sabun monovalen (TEA-stearat), tween, Na lauril sulfat, CMC, pektin."],
+  ["Penstabil krim","Antioksidan & pengawet (nipagin 0,12–0,18%, nipasol 0,02–0,05%)."],
+  ["Keratolitik","Asam salisilat 4–10%, resorsin 2–4%, sulfur 4–10%, TCA kadar tinggi."],
+  ["Oculentum simplex","Cetyl alc. 2,5; adeps lanae 6; vaselin 51,5; parafin cair ad 100."],
+  ["Kolir","Saring lelehan dengan kasa; bahan dilebihkan 10–20%."],
+  ["Oleum cacao > 10%","Lelehkan sebagian saja (polimorfi)."],
+ ]},
+/* ---------------- 10 ---------------- */
+{id:"t10", fase:"UAS", no:10, title:"BUD (Beyond Use Date)",
+ short:"BUD vs ED, aturan USP 795, skema BUD racikan, BUD sediaan steril & vaksin.",
+ src:"BUD.pptx", tools:["bud"], cases:["c1","c4"],
+ blocks:[
+ {h:"BUD vs ED", html:`<div class="cols"><div><h4>Beyond Use Date (BUD)</h4><p>Batas waktu penggunaan obat <b>setelah diracik/disiapkan</b> atau setelah kemasan primernya dibuka. BUD sama dengan atau lebih pendek dari ED, dan tidak selalu tercantum.</p></div>
+ <div><h4>Expiration Date (ED)</h4><p>Batas waktu penggunaan obat setelah diproduksi pabrik, <b>sebelum kemasan dibuka</b>. Dicantumkan pabrik pada kemasan.</p></div></div>
+ <p class="muted">Kemasan primer = kemasan yang langsung bersentuhan dengan obat: botol, ampul, vial, blister.</p>`},
+ {h:"Aturan USP 795 (nonsteril)", html:`<div class="tw"><table class="t"><thead><tr><th>Tipe formula</th><th>BUD maksimum</th></tr></thead><tbody>
+  <tr><td>Non-aqueous &amp; padat, dibuat dari <b>obat jadi</b></td><td>25% sisa waktu ED masing-masing bahan, atau 6 bulan (mana yang lebih dulu)</td></tr>
+  <tr><td>Non-aqueous &amp; padat, dibuat dari <b>zat aktif</b></td><td>ED masing-masing bahan, atau 6 bulan (mana yang lebih dulu)</td></tr>
+  <tr><td>Oral mengandung air</td><td>14 hari, disimpan dingin 2–8 °C</td></tr>
+  <tr><td>Topikal/dermal berair, cairan mukosa, setengah padat</td><td>30 hari</td></tr></tbody></table></div>
+ <ul><li>Serbuk, kapsul, tablet racikan: 25% sisa ED atau 6 bulan; umumnya diberi 3 bulan.</li><li>Suspensi tanpa pengawet/tidak stabil: umumnya 7–17 hari.</li><li>Emulsi: oral 14 hari (dingin), topikal 30 hari (suhu kamar).</li><li>Salep, krim, pasta dari bahan padat: 30 hari. Gel berair: 14 hari dingin; topikal 30 hari.</li><li>Ophthalmic &amp; otic berair: 30 hari dingin. Inhaler &amp; parenteral berair: 14 hari dingin.</li></ul>`},
+ {h:"Skema BUD racikan puyer & kapsul", html:`<ol><li>Cek ED masing-masing obat; pakai yang paling dekat.</li><li>Jika sisa ED <b>&lt; 6 bulan</b> → BUD maks = ED.</li><li>Jika sisa ED <b>&gt; 6 bulan</b> → hitung 25% × sisa waktu.</li><li>Hasil &lt; 6 bulan → BUD = hasil hitungan. Hasil &gt; 6 bulan → BUD = 6 bulan.</li></ol>
+ <div class="formula">Contoh arsip: ED 12 bulan lagi → 25% × 12 = 3 bulan</div>
+ <p>Racikan cair (larutan, suspensi, emulsi oral): mengandung air → BUD maks 14 hari. Tidak mengandung air → ikuti skema di atas.</p>
+ <h4>Produk obat pabrik</h4><p>Ikuti info pabrik. Tanpa info: ED &lt; 1 tahun → BUD maks = ED; ED &gt; 1 tahun → BUD maks 1 tahun. Sediaan cair rekonstitusi: cek kemasan/brosur.</p>`},
+ {h:"Sediaan steril", html:`<p>Produk steril biasanya tanpa pengawet. Contoh: seftriakson 1 g vial belum dibuka ED 3 tahun; setelah direkonstitusi stabil 24 jam pada 25 °C dan 4 hari pada 2–8 °C.</p>
+ <div class="tw"><table class="t"><thead><tr><th>Penyimpanan</th><th>Risiko rendah</th><th>Risiko sedang</th><th>Risiko tinggi</th></tr></thead><tbody>
+  <tr><td>Suhu kamar (&lt; 25 °C)</td><td class="n">48 jam</td><td class="n">30 jam</td><td class="n">24 jam</td></tr>
+  <tr><td>Kulkas (2–8 °C)</td><td class="n">14 hari</td><td class="n">9 hari</td><td class="n">3 hari</td></tr>
+  <tr><td>Beku (≤ −10 °C)</td><td class="n" colspan="3">45 hari</td></tr></tbody></table></div>
+ <p><b>5 tingkat risiko (USP)</b>: segera digunakan (≤ 1 jam) · rendah (ISO Class 5, sedikit tahap) · rendah dengan BUD 12 jam · sedang (banyak tahap, multi-pasien, atau dipakai berkali-kali) · tinggi (bahan tidak steril, bukan di ISO Class 5, atau sterilisasi &gt; 6 jam setelah penyiapan).</p>
+ <p class="muted">Vaksin (contoh tabel): Hib 24 jam · polio segera · MMR 8 jam · meningokokus 8 jam · rotavirus 24 jam.</p>`},
+ ],
+ traps:["Rumus arsip Bu Yaya: sisa &lt; 6 bulan → BUD = ED; sisa &gt; 6 bulan → 25% × sisa, maksimal 6 bulan.",
+        "Racikan oral yang mengandung air: 14 hari di kulkas, bukan 30 hari."],
+ cards:[
+  ["Definisi BUD","Batas waktu penggunaan obat setelah diracik atau kemasan primer dibuka."],
+  ["BUD vs ED","ED: dari pabrik, sebelum kemasan dibuka. BUD ≤ ED."],
+  ["BUD racikan padat dari obat jadi","25% sisa ED atau 6 bulan, mana yang lebih dulu."],
+  ["BUD racikan padat dari zat aktif","ED bahan atau 6 bulan, mana yang lebih dulu."],
+  ["BUD oral berair","14 hari, disimpan 2–8 °C."],
+  ["BUD topikal berair/semisolid","30 hari."],
+  ["Sisa ED < 6 bulan (racikan puyer)","BUD maks = ED."],
+  ["Seftriakson rekonstitusi","24 jam pada 25 °C; 4 hari pada 2–8 °C."],
+  ["Steril risiko rendah, suhu kamar","48 jam (kulkas 14 hari)."],
+  ["Steril risiko sedang","30 jam suhu kamar; 9 hari kulkas."],
+  ["Steril risiko tinggi","24 jam suhu kamar; 3 hari kulkas."],
+  ["Steril disimpan beku","45 hari."],
+  ["Produk pabrik tanpa info, ED > 1 tahun","BUD maks 1 tahun."],
+ ]},
+];
+
+// ===================== SINGKATAN LATIN (flashcard t2) =====================
+const LATIN = [
+ ["R/","Recipe — ambillah"],["m.f.","misce fac — campur dan buatlah"],["pulv.","pulveres — serbuk (bungkus)"],["d.t.d.","da tales doses — berikan takaran tersebut sebanyak ..."],
+ ["No.","numero — sejumlah"],["S.","signa — tandai / aturan pakai"],["d.d.","de die — sehari"],["b.d.d.","bis de die — sehari 2 kali"],["t.d.d.","ter de die — sehari 3 kali"],
+ ["q.d.d.","quater de die — sehari 4 kali"],["a.c.","ante cibum — sebelum makan"],["p.c.","post coenam — sesudah makan"],["½ h.p.c.","semi hora post coenam — ½ jam sesudah makan"],
+ ["o. ¼ h.","omni quarta hora — tiap ¼ jam"],["vesp.","vespere — malam hari"],["q.s.","quantum satis — secukupnya"],["aa","ana — sama banyak"],["ad","sampai (jumlah total)"],
+ ["u.c.","usus cognitus — aturan pakai sudah diketahui"],["u.e. / us. ext.","usus externus — untuk pemakaian luar"],["m.d.s.","misce da signa — campur, serahkan, tandai"],
+ ["da in caps.","berikan dalam kapsul"],["n.i.","ne iteretur — tidak boleh diulang"],["iter","iteretur — boleh diulang"],["det.","detur — diserahkan"],
+ ["cito / statim / urgent","segera"],["p.i.m.","periculum in mora — bahaya bila ditunda"],["p.p.","pro paupere — untuk orang miskin"],["m.i.","mihi ipsi — untuk dipakai sendiri (dokter)"],
+ ["r.p. / rec. par.","recenter paratus — dibuat baru"],["C.","cochlear — sendok makan (15 ml)"],["cth.","cochlear theae — sendok teh (5 ml)"],["gtt.","guttae — tetes"],
+ ["gtt. auric.","guttae auriculares — tetes telinga"],["gtt. ophth.","guttae ophthalmicae — tetes mata"],["ungt.","unguentum — salep"],["supp.","suppositoria"],
+ ["part. dol.","parte dolente — (oleskan) pada bagian yang sakit"],["pon. aur.","pone aurem — di belakang telinga"],["pro rect.","secara rektal"],["p.r.n.","pro re nata — bila perlu"],
+ ["s.q.d.d.p.","signa quater de die pulverem — tandai: 4 kali sehari 1 bungkus"],["m.f. pulv. devide in partes aequales","campur, buat serbuk, bagi dalam bagian yang sama"],
+ ["bis / ter","2 / 3"],["dimidia","½"],["pars tertia / quarta / quinta","⅓ / ¼ / ⅕"],
+];
+
+// ===================== BANK SOAL =====================
+// src: "Bu Yaya" (arsip UTS PO smt 3), "Bu Rahmi" (arsip UAS + kuis), "Latihan modul" (dibuat dari slide)
+const CTX = {
+ ceph:"R/ Cephalexin caps. 500 mg\n     S. t.d.d. caps. I — 10 hari\nApotek hanya punya kapsul cephalexin 250 mg.",
+ meta:"R/ Codein tab.        ½\n     Pamol tab.          ⅕\n     Efedrin HCl         10 mg\n     m.f. pulv. da in caps. d.t.d. No. XII\n     S. t.d.d. caps. I\nPro: Meta (6 tahun 3 bulan)\nDiketahui: tablet kodein HCl 10 mg (bobot 100 mg) · tablet parasetamol 500 mg (bobot 700 mg) · DM kodein 60 mg/300 mg · DM efedrin HCl 50 mg/150 mg",
+ mela:"R/ Piridoksin HCl      0,6\n     Pamol tab.          III\n     Efedrin HCl tab.    V\n     Aminofilin          1,2\n     m.f. pulv. No. XII\n     S. t.d.d. pulv. I p.c.\nPro: Mela (8 tahun 5 bulan)\nDiketahui: DM efedrin HCl 50 mg/150 mg · DM aminofilin 500 mg/1500 mg · tablet efedrin HCl 10 mg (bobot 100 mg) · bobot tablet parasetamol 700 mg",
+ hct:"R/ HCT                20 mg\n     Triamteren          40 mg\n     Laktosa             q.s.\n     m.f. pulv. d.t.d. No. X da in caps.\n     S. b.d.d. caps. I\n(Resep dari slide Kapsul)",
+ proc:"R/ Procain HCl        0,100\n     Aq. Rosae           1\n     Adeps Lanae         3\n     Zinci Oxyd.         3\n     Vaselin ad          30\n     m.d.s. us. ext.",
+ pen:"R/ Penicillini        100.000 U\n     Adipis Lanae        1\n     Paraff. liquid.     2\n     Vaselini flavi      7\nTersedia campuran vaselin flavum yang mengandung 50.000 U penisilin per gram.",
+};
+const Y="Bu Yaya", R="Bu Rahmi", L="Latihan modul";
+const QUIZ = [
+// ---------- Arsip UTS (Bu Yaya) ----------
+{t:"t5",f:"UTS",s:Y,q:"Bila semua serbuk dapat melalui pengayak no. 10 dan 30% dapat melalui pengayak no. 22, derajat halus serbuk dinyatakan dengan nomor:",o:["10/22","10","22","22/10"],a:0,e:"Dua nomor: semua lewat nomor terendah (10), dan tidak lebih dari 40% lewat nomor tertinggi (22). 30% < 40%, jadi 10/22."},
+{t:"t5",f:"UTS",s:Y,q:"Menurut FI III, serbuk 44/85 adalah serbuk:",o:["Agak halus","Kasar","Halus","Agak kasar"],a:0,e:"10/40 kasar · 22/60 agak kasar · 44/85 agak halus · 85 halus."},
+{t:"t5",f:"UTS",s:Y,q:"Bahan digerus dengan terlebih dahulu ditetesi spiritus fortior. Ini cara menyerbukkan bahan berikut, KECUALI:",o:["Asam askorbat","Kamfer","Asam benzoat","Asam salisilat"],a:0,e:"Kamfer, asam salisilat, asam benzoat (dan β-naftol) dibasahi etanol 96% sebelum digerus. Asam askorbat tidak termasuk."},
+{t:"t5",f:"UTS",s:Y,q:"Bila pulveres diminta 12 bungkus, serbuknya dibagi secara visual.",o:["Benar","Salah"],a:1,e:"Visual hanya untuk < 10 bungkus. Lebih dari 10: timbang, bagi dua sama berat, lalu bagi visual."},
+{t:"t5",f:"UTS",s:Y,q:"Elaeosaccharum merupakan campuran dari:",o:["2 g sacch. album + 2 tetes minyak atsiri","1 g sacch. album + 1 tetes minyak atsiri","2 g sacch. album + 1 tetes minyak atsiri","1 g sacch. album + 2 tetes minyak atsiri"],a:2,e:"Elaeosaccharum = 2 g gula + 1 tetes minyak atsiri, dibuat baru (r.p.)."},
+{t:"t5",f:"UTS",s:Y,q:"Bahan diuapkan di atas waterbath sampai kental sirop, lalu ditambah SL sambil diaduk dan dipanaskan sampai kering. Ini cara mengerjakan bahan berikut, KECUALI:",o:["Ekstrak belladona","Tinctura belladona","Ekstrak rhamni purshianae liquidum","Tinctura opii"],a:0,e:"Tingtur dan ekstrak cair diuapkan di waterbath. Ekstrak belladona adalah ekstrak kental: diencerkan di lumpang panas dengan spiritus 90%, lalu ditambah SL.",flag:"Dua salinan arsip punya kunci berbeda (a dan c). Kunci di sini mengikuti slide Pulvis: ekstrak cair dikerjakan seperti tingtur, ekstrak kental tidak."},
+{t:"t5",f:"UTS",s:Y,q:"Bahan yang bisa dijadikan basis pada pulveres, KECUALI:",o:["Bolus alba","Talkum","Cera alba","Pati"],a:2,e:"Cera alba (malam putih) adalah bahan salep, bukan basis serbuk."},
+{t:"t6",f:"UTS",s:Y,q:"Pada pulvis adspersorius, adeps lanae bila jumlahnya sedikit dilarutkan dalam etanol, lalu ditambah pengisi dan diaduk hingga kering dan halus.",o:["Benar","Salah"],a:1,e:"Adeps lanae sedikit dilarutkan dalam aseton atau eter, bukan etanol."},
+{t:"t6",f:"UTS",s:Y,q:"Formalin bila jumlahnya sedikit dicampur ke massa pulvis adspersorius pada saat terakhir setelah serbuk diayak (2 tetes untuk setiap gram serbuk).",o:["Benar","Salah"],a:0,e:"Sesuai slide Bedak Tabur."},
+{t:"t6",f:"UTS",s:Y,q:"Formalin bila jumlahnya banyak diganti ¼ beratnya dengan serbuk paraformaldehid, kekurangan beratnya (¾) diganti pengisi.",o:["Benar","Salah"],a:1,e:"Yang benar: diganti ⅓ beratnya dengan paraformaldehid, sisa ⅔ diganti pengisi."},
+{t:"t5",f:"UTS",s:Y,q:"Spiritus fortior adalah:",o:["Etanol 90%","Etanol 96%","Etanol 70%","Etanol absolut"],a:1,e:"Fortior 96% · spiritus 90% · dilutus 70%."},
+{t:"t7",f:"UTS",s:Y,ctx:"ceph",q:"Berapa jumlah total kapsul yang diserahkan?",o:["80","40","20","60"],a:3,e:"500 mg × 3 × 10 hari = 15.000 mg ÷ 250 mg = 60 kapsul."},
+{t:"t7",f:"UTS",s:Y,ctx:"ceph",q:"Berapa kapsul yang harus diminum sekali?",o:["3","1","2","4"],a:2,e:"500 mg ÷ 250 mg = 2 kapsul."},
+{t:"t7",f:"UTS",s:Y,ctx:"ceph",q:"Berapa kapsul yang harus diminum sehari?",o:["4","2","6","8"],a:2,e:"2 kapsul × 3 kali = 6 kapsul."},
+{t:"t3",f:"UTS",s:Y,ctx:"meta",q:"% dosis pemakaian sekali dari kodein adalah:",o:["30%","26%","20%","24%"],a:3,e:"Young: 6,25/(6,25+12) = 0,342. DM sekali anak = 0,342 × 60 = 20,5 mg. Kodein per kapsul = ½ × 10 = 5 mg → 5/20,5 = 24%."},
+{t:"t3",f:"UTS",s:Y,ctx:"meta",q:"% dosis pemakaian sehari dari kodein adalah:",o:["14,6%","18,6%","12,6%","16,6%"],a:0,e:"DM sehari anak = 0,342 × 300 = 102,7 mg. Sehari = 3 × 5 = 15 mg → 14,6%."},
+{t:"t3",f:"UTS",s:Y,ctx:"meta",q:"% dosis pemakaian sekali dari efedrin HCl adalah:",o:["62,7%","58,4%","50%","55,5%"],a:1,e:"DM sekali anak = 0,342 × 50 = 17,1 mg → 10/17,1 = 58,4%."},
+{t:"t3",f:"UTS",s:Y,ctx:"meta",q:"% dosis pemakaian sehari dari efedrin HCl adalah:",o:["58,4%","50%","55,5%","62,7%"],a:0,e:"DM sehari anak = 0,342 × 150 = 51,4 mg → 30/51,4 = 58,4%."},
+{t:"t7",f:"UTS",s:Y,ctx:"meta",q:"Jumlah tablet kodein yang diambil adalah:",o:["5","7","4","6"],a:3,e:"½ tablet × 12 kapsul = 6 tablet."},
+{t:"t7",f:"UTS",s:Y,ctx:"meta",q:"Jumlah tablet pamol yang diambil adalah:",o:["2,8","2,4","2,6","2"],a:1,e:"⅕ × 12 = 2,4 tablet (gerus 3 tablet, timbang 2,4 × 700 = 1680 mg)."},
+{t:"t7",f:"UTS",s:Y,ctx:"meta",q:"Jumlah efedrin HCl yang diambil adalah:",o:["100 mg","180 mg","120 mg","200 mg"],a:2,e:"10 mg × 12 = 120 mg."},
+{t:"t7",f:"UTS",s:Y,ctx:"meta",q:"Kapsul nomor berapa yang digunakan?",o:["2","5","3","4"],a:3,e:"Serbuk: 600 + 1680 + 120 = 2400 mg ÷ 12 = 200 mg = 3,08 grain. 7 − 3,08 = 3,92 ≈ 4 → kapsul no. 4."},
+{t:"t3",f:"UTS",s:Y,ctx:"mela",q:"% dosis pemakaian sekali dari efedrin HCl adalah:",o:["20%","15%","19,8%","14,4%"],a:2,e:"Efedrin 5 tab × 10 mg = 50 mg ÷ 12 = 4,17 mg/bungkus. Dilling 8,42/20 = 0,421 → DM sekali anak 21,05 mg → 19,8%."},
+{t:"t3",f:"UTS",s:Y,ctx:"mela",q:"% dosis pemakaian sehari dari aminofilin adalah:",o:["50%","42,5%","47,5%","45%"],a:2,e:"1200 mg ÷ 12 = 100 mg/bungkus × 3 = 300 mg. DM sehari anak = 0,421 × 1500 = 631,5 mg → 47,5%."},
+{t:"t5",f:"UTS",s:Y,ctx:"mela",q:"Jumlah piridoksin HCl yang diambil adalah:",o:["0,6 g","50 mg","150 mg","0,6 mg"],a:0,e:"Tanpa d.t.d., angka di resep adalah jumlah total. Satuan tanpa keterangan = gram → 0,6 g."},
+{t:"t5",f:"UTS",s:Y,ctx:"mela",q:"Jumlah tablet pamol yang diambil adalah:",o:["6","24","3","12"],a:2,e:"III = 3 tablet total (tanpa d.t.d.)."},
+{t:"t5",f:"UTS",s:Y,ctx:"mela",q:"Jumlah tablet efedrin HCl yang diambil adalah:",o:["15","5","12","60"],a:1,e:"V = 5 tablet total."},
+{t:"t5",f:"UTS",s:Y,ctx:"mela",q:"Jumlah aminofilin yang diambil adalah:",o:["1,2 g","1,2 mg","14,4 mg","14,4 g"],a:0,e:"1,2 (gram) total untuk 12 bungkus."},
+{t:"t5",f:"UTS",s:Y,ctx:"mela",q:"Bila berat 1 bungkus serbuk 400 mg, jumlah laktosa yang digunakan adalah:",o:["200 mg","500 mg","400 mg","300 mg"],a:2,e:"Bahan: 600 + 2100 + 500 + 1200 = 4400 mg (366,7 mg/bungkus). Total 12 × 400 = 4800 mg → laktosa 400 mg (33,3 mg/bungkus).",flag:"Catatan tulisan tangan di arsip menulis “e. 100 mg” (tidak ada di pilihan). Jawaban di sini dihitung ulang dari data soal; cek ke dosen."},
+{t:"t7",f:"UTS",s:Y,ctx:"hct",q:"Kalau yang tersedia tablet HCT 50 mg, berapa tablet yang digunakan?",o:["6","2","8","4"],a:3,e:"20 mg × 10 = 200 mg ÷ 50 mg = 4 tablet."},
+{t:"t7",f:"UTS",s:Y,ctx:"hct",q:"Bila tersedia tablet triamteren 50 mg, berapa tablet yang digunakan?",o:["8","10","2","4"],a:0,e:"40 mg × 10 = 400 mg ÷ 50 mg = 8 tablet."},
+{t:"t7",f:"UTS",s:Y,ctx:"hct",q:"Bila bobot 1 tablet HCT 150 mg dan 1 tablet triamteren 250 mg, kapsul nomor berapa yang digunakan?",o:["1","3","2","4"],a:1,e:"4 × 150 + 8 × 250 = 2600 mg ÷ 10 = 260 mg = 4 grain → 7 − 4 = 3 → kapsul no. 3.",flag:"Teks resep tidak terlihat di arsip ujian; resep diambil dari slide Kapsul dan arsip belum menandai jawaban soal ini."},
+{t:"t10",f:"UTS",s:Y,q:"Kedaluwarsa bahan penyusun serbuk bagi 1 tahun lagi. BUD serbuk tersebut adalah:",o:["3 bulan","1 bulan","4 bulan","6 bulan"],a:0,e:"Sisa > 6 bulan → 25% × 12 bulan = 3 bulan (< 6 bulan, jadi BUD = 3 bulan)."},
+// ---------- Arsip UAS + Kuis (Bu Rahmi) ----------
+{t:"t9",f:"UAS",s:R,q:"R/ Ephedrini 0,100 · Cocaini HCl 0,1 · Antipyrini 0,5 · Paraff. liq. 5 · Lanolini 15. Dalam proses pembuatan salep:",o:["Efedrin dilarutkan tersendiri","Efedrin dilarutkan dalam campuran adeps lanae dan paraff. liq. yang dipanaskan","Efedrin dilarutkan bersamaan dengan kokain HCl","Efedrin dilarutkan dalam air yang tersedia","Efedrin dilarutkan dalam lanolin yang dipanaskan"],a:1,e:"Efedrin basa larut dalam minyak/lemak (aturan I), sedangkan garamnya (kokain HCl) larut air."},
+{t:"t9",f:"UAS",s:R,q:"Vanishing cream base (asam stearat, cera alba, vaselin, TEA, propilen glikol, air) adalah krim M/A. Selain dari jumlah air, tipenya bisa dilihat dari:",o:["Triethanolamin","Cera alba","Fasa minyak yang digunakan","Propilen glikol","Fasa air yang digunakan"],a:0,e:"TEA + asam stearat membentuk TEA-stearat, sabun monovalen = pengemulsi M/A."},
+{t:"t9",f:"UAS",s:R,ctx:"pen",q:"Cara pengambilan bahan untuk resep di atas adalah:",o:["Campuran vaselin-penisilin 2 g, adeps lanae 1 g, paraffin liq. 2 g, vaselin flavum 7 g","Campuran vaselin-penisilin 2 g, adeps lanae 1 g, paraffin liq. 2 g","Penisilin 100.000 U, adeps lanae 1 g, paraffin liq. 2 g, vaselin flavum 7 g","Campuran vaselin-penisilin, adeps lanae 1 g, paraffin liq. 2 g, vaselin flavum 7 g","Campuran vaselin-penisilin 2 g, adeps lanae 1 g, paraffin liq. 2 g, vaselin flavum 5 g"],a:4,e:"100.000 U ÷ 50.000 U/g = 2 g campuran. Campuran itu sudah berisi vaselin, jadi vaselin tambahan = 7 − 2 = 5 g."},
+{t:"t9",f:"UAS",s:R,ctx:"proc",q:"Dalam pembuatan salep di atas:",o:["Prokain HCl dilarutkan dalam Aq. Rosae","Prokain HCl dilarutkan dalam vaselin yang dilebur","Prokain HCl dilarutkan dalam campuran adeps lanae dan vaselin yang dilebur","ZnO dilarutkan dalam Aq. Rosae","ZnO dilarutkan dalam adeps lanae"],a:0,e:"Prokain HCl mudah larut air (aturan II): larutkan dalam air yang tersedia (aq. rosae) dulu."},
+{t:"t9",f:"UAS",s:R,q:"R/ Belladon. extr. 0,4 · Tannini 1 · Ratanh. extr. 16 · Lanolini, Vaselini flav. aa 12. Dalam pembuatan salep, KECUALI:",o:["Ratanh. extr. ditaburkan dulu dalam air sama banyak, diamkan 15 menit, digerus","Air lanolin tidak cukup untuk ratanhia & belladon, air boleh ditambah dan basis dikurangi sebanyak air","Tanin sukar larut air, diserbukkan dan digerus dengan basis","Belladon extr. (ekstrak kental) digerus dulu dengan sedikit air","Jumlah air yang dikandung lanolin adalah 4 ml"],a:4,e:"Lanolin berisi 25% air: 12 g × 25% = 3 ml, bukan 4 ml."},
+{t:"t9",f:"UAS",s:R,q:"Unguentum Acidi Benzoici et Acidi Salicylici (Ph. Ned. VI): R/ Acidi Benzoici 5 · Acidi Salicylici 5 · Lanolini 45 · Vaselini 45. Yang TIDAK termasuk proses pembuatan salep:",o:["Acidum boricum selalu diayak lebih dulu sebelum ditimbang","Acidum boricum selalu ditimbang lebih dulu dan kemudian diayak","Basis adeps lanae + vaselin dilelehkan, aduk ad dingin, tambah air dari lanolin sedikit demi sedikit","Acidum boricum ditambah basis sama banyak dan digerus homogen","Acidi salicylici ditetesi spiritus fortior, digerus, dicampur basis sama banyak"],a:1,e:"Asam borat (dan ZnO) selalu diayak dulu, baru ditimbang. Urutan sebaliknya salah."},
+{t:"t9",f:"UAS",s:R,q:"Proses pembuatan Unguentum Olei Iecoris Aselli (ol. iecoris aselli 40 · cera flava 10 · vaselin flavum 50) adalah:",o:["Cera flava dilebur panas + vaselin + ol. iecoris aselli, digerus","Cera flava + vaselin + ol. iecoris aselli digerus homogen","Cera flava + vaselin dilebur di tangas air, aduk ad dingin, + ol. iecoris aselli, gerus homogen","Ketiganya dilebur di tangas air dan digerus ad dingin","Cera flava + ol. iecoris aselli dilebur, aduk ad dingin + vaselin"],a:2,e:"Minyak ikan termasuk bahan yang ditambahkan terakhir pada basis yang sudah dingin."},
+{t:"t9",f:"UAS",s:R,q:"R/ Resorcini 0,6 · Sulf. praecip. 2,5 · Cetacei 6 · Olei Cacao 3 · Ol. Sesami 25. Pembuatan basisnya dilakukan dengan cara:",o:["Setaseum, ol. sesami, ol. cacao digerus homogen","Setaseum, ol. sesami, ol. cacao dilebur di tangas air lalu didinginkan sambil digerus","Ol. cacao + ol. sesami dilebur, turunkan, tambah setaseum, gerus, dinginkan","Setaseum + ol. cacao dilebur, turunkan, tambah ol. sesami, gerus, dinginkan","Setaseum + ol. sesami dilebur di tangas air, turunkan, aduk rata, tambah ol. cacao, gerus homogen, dinginkan"],a:4,e:"Ol. cacao bersifat polimorfi, jadi tidak ikut dilebur penuh; ditambahkan setelah leburan setaseum + ol. sesami diturunkan."},
+{t:"t9",f:"UAS",s:R,q:"R/ Kalii Iodidi 2 · Cera flava 3 · Ol. Sesami 3 · Lanolini 10. Yang BUKAN termasuk proses pembuatannya:",o:["Cera flava, ol. sesami, adeps lanae dilebihkan 10–20% bila dikolir","Cera flava, ol. sesami, lanolin dilebur dan diaduk homogen","Air lanolin diambil untuk melarutkan KI","Cera flava, adeps lanae bila perlu dikolir","Cera flava, ol. sesami, adeps lanae dilebur dan diaduk homogen"],a:1,e:"Lanolin (berair) tidak ikut dilebur. Yang dilebur hanya bagian lemaknya (adeps lanae); airnya dipakai melarutkan KI."},
+{t:"t9",f:"UAS",s:R,q:"R/ Bentonit 1 · Sulf. praecip. 2 · ZnO 10 · Talk 10 · Ichthammol 0,5 · Gliserin, Air aa 5. Yang BUKAN kriteria resep ini:",o:["Semua serbuk dicampur dan digerus, ditambah campuran gliserin dan air","Termasuk kelompok pasta berlemak","Haluskan, ayak, dan timbang ZnO, sulfur, bentonit, talk","Termasuk kelompok pasta kering","Ichthammol ditetesi spiritus fortior, digerus, dikeringkan dengan sebagian talk"],a:1,e:"Resep ini bebas lemak (tanpa vaselin/parafin), jadi pasta kering. Bentonit sebagai stabilisator."},
+{t:"t9",f:"UAS",s:R,q:"Salep tiga dara: R/ ZnO, Ol. Olivae, Calcii Hydroxidi Solutio aa 10. Yang BUKAN kriteria pembuatannya:",o:["Aqua calcis + minyak membentuk sabun Ca-oleat","ZnO diayak, ditimbang, digerus dengan basis sama banyak lalu sisa basis","Tipe emulsi yang terbentuk A/M","Calcii hydroxidi solutio dalam mortir, tambah ol. olivae sekaligus, aduk kuat","Tipe emulsi yang terbentuk M/A"],a:4,e:"Sabun Ca-oleat adalah sabun polivalen → emulsi A/M. Jadi “M/A” salah."},
+{t:"t9",f:"UAS",s:R,q:"Kamfer dihaluskan dengan spiritus fortior atau eter (2× berat kamfer) sampai larut. Mencampurnya dengan basis mengikuti aturan umum pembuatan salep:",o:["V","IV","III","II","I"],a:4,e:"Zat yang larut dalam dasar salep → aturan umum I."},
+{t:"t9",f:"UAS",s:R,q:"Camphorae solutio spirituosa, iodii tinctura, opii tinctura, acidi salicylici spirituosa adalah cairan alkoholis yang sukar diserap basis. Yang BUKAN cara penanganannya:",o:["Berat cairan alkohol digantikan sama banyak dengan basis salep","Bila kadar zat berkhasiatnya diketahui, diambil zat berkhasiat murninya saja","Berat cairan yang hilang atau menguap diganti dengan dasar salep","Bila kadar tidak diketahui dan tidak tahan panas: pemanasan serendah mungkin + kipas angin","Bila kadar zat berkhasiat tidak diketahui, cukup diganti dengan basis salep"],a:4,e:"Jika kadar tidak diketahui, cairan diuapkan (pemanasan rendah + kipas), lalu berat yang hilang diganti basis. Tidak bisa langsung diganti basis.",flag:"Arsip menandai pilihan b. Menurut slide Unguentum II, b justru cara yang benar (zat berkhasiat diketahui → ambil zatnya saja). Cek ke dosen."},
+{t:"t8",f:"UAS",s:R,q:"Fungsi lain aqua glycerinata selain sebagai pembasah pada pil adalah:",o:["Mencegah pil lengket pada papan","Pengikat","Pengisi","Mencegah pengerasan pil selama penyimpanan","Mencegah pengelupasan pil"],a:3,e:"Gliserin tidak mudah menguap, sehingga pil tidak mengeras."},
+{t:"t9",f:"UAS",s:R,q:"Cara penambahan gliserin ke dalam basis salep adalah:",o:["Gliserin + basis berlemak dilebur bersama","Gliserin bila banyak ditambahkan langsung pada massa salep","Gliserin sedikit ke basis dingin; bila banyak dilarutkan dalam air yang tersedia","Gliserin bila sedikit dan ada air dalam formula, dilarutkan dalam air lalu ditambahkan ke basis","Gliserin bila perlu dilarutkan air lalu dicampur basis yang masih panas"],a:3,e:"Sedikit → larutkan dalam air yang ada. Banyak → tambahkan sedikit demi sedikit ke salep yang sudah dingin."},
+{t:"t9",f:"UAS",s:R,q:"Hal yang TIDAK BOLEH dilakukan dalam pembuatan salep dengan peleburan:",o:["Untuk yang dikolir, bahan dilebihkan 10–20%","Bahan berair seperti lanolin dilelehkan bersama basis lemak lainnya","Bahan basis alami yang kotor dikolir","Massa yang melekat dilepas dengan kertas film","Dilebur di cawan porselin dengan batang gelas/spatel kayu"],a:1,e:"Bahan berair tidak dilebur; ambil bagian lemaknya, air ditambahkan setelah dingin."},
+{t:"t9",f:"UAS",s:R,q:"Kemampuan vaselin mendukung air: 3% kolesterol → 250%. Yang menjadi 800% adalah:",o:["3% kolesterol + 3% kolesterol asetat","3% kolesterol + 3% kolesterol stearat","3% kolesterol + 3% cetaceum/cera alba","3% kolesterol + 3% kolesterol palmitat","3% kolesterol + 3% kolesterol laurat"],a:1,e:"Asetat 500% · laurat 600% · palmitat 700% · stearat 800% · cetaceum/cera alba 500%."},
+{t:"t9",f:"UAS",s:R,q:"Keratolitik (menghilangkan/melunakkan lapisan tanduk) adalah:",o:["Fenol 0,5%","Kamfer 2%","Pix lithanthracis 2–10%","Asam salisilat 4–10%","Mentol 0,25%"],a:3,e:"Fenol, kamfer, pix, mentol pada kadar itu adalah antipruritik."},
+{t:"t9",f:"UAS",s:R,q:"Untuk menjaga stabilitas krim selama penyimpanan ditambahkan:",o:["Humektan","Surfaktan","Detergen","Zat pengemulsi","Antioksidan dan pengawet"],a:4,e:"Krim (lemak + air) mudah ditumbuhi mikroba dan teroksidasi."},
+{t:"t9",f:"UAS",s:R,q:"Minyak atsiri dan zat mudah menguap seperti mentol ditambahkan ke salep dengan cara:",o:["Dilarutkan dulu baru ditambahkan ke basis","Dicampurkan terakhir pada basis yang sudah dingin","Dilarutkan dalam air yang ada","Dilarutkan bersama basis berlemak dengan pemanasan","Dicampurkan pada basis yang masih panas"],a:1,e:"Supaya tidak menguap saat panas."},
+{t:"t8",f:"UAS",s:R,q:"Pada pembuatan pil yang mengandung ekstrak kental, ekstraknya umumnya:",o:["Digerus halus","Dilarutkan dengan air","Direndam spiritus fortior","Direndam spiritus dilutus","Direndam metanol"],a:3,e:"Ekstrak kental direndam spiritus dilutus (atau pelarut pengekstraknya)."},
+{t:"t9",f:"UAS",s:R,q:"Pembuatan salep dengan cara peleburan mengikuti aturan umum pembuatan salep:",o:["I","II","III","IV","V"],a:3,e:"I larut di basis · II larut air · III tidak larut · IV peleburan."},
+{t:"t9",f:"UAS",s:R,q:"Vaselin putih dan vaselin kuning termasuk golongan dasar salep:",o:["Yang umum dipakai","Larut dalam air","Dapat dicuci dengan air","Hidrokarbon","Serap"],a:3,e:"Vaselin = dasar salep hidrokarbon."},
+{t:"t9",f:"UAS",s:R,q:"Yang BUKAN dasar salep serap adalah:",o:["Adeps lanae","Unguentum simplex","Vaselin","Lanolin","Cera alba"],a:2,e:"Vaselin termasuk dasar salep hidrokarbon.",flag:"Cera alba juga bukan dasar salep serap (ia komponen/pengeras). Kunci arsip memilih vaselin."},
+{t:"t9",f:"UAS",s:R,q:"Yang TIDAK termasuk definisi unguenta menurut FI III:",o:["Setengah padat, mudah dioleskan, obat luar","Tidak boleh berbau tengik","Kadar obat keras dinyatakan dalam persentase","Bahan obat larut/terdispersi homogen dalam basis","Kadar bahan obat narkotika dinyatakan dalam miligram"],a:4,e:"Kadar obat keras maupun narkotika dinyatakan dalam persentase."},
+{t:"t9",f:"UAS",s:R,q:"Zat pengemulsi krim tipe A/M adalah:",o:["Cera","Amonium stearat","CMC","Natrium lauril sulfat","Trietanolamin stearat"],a:0,e:"A/M: sabun polivalen, span, adeps lanae, kolesterol, cera. Sisanya pengemulsi M/A."},
+{t:"t9",f:"UAS",s:R,q:"Zat pengemulsi krim tipe M/A adalah:",o:["Tween","Sabun polivalen","Adeps lanae","Span","Kolesterol"],a:0,e:"Tween = pengemulsi M/A."},
+{t:"t9",f:"UAS",s:R,q:"Yang BUKAN zat pengemulsi krim tipe M/A adalah:",o:["Cera","CMC","Amonium stearat","Trietanolamin stearat","Natrium lauril sulfat"],a:0,e:"Cera adalah pengemulsi A/M."},
+{t:"t8",f:"UAS",s:R,q:"Zat tambahan dalam pembuatan pil pada umumnya adalah:",o:["Pengisi, pengikat, pelincir, penghancur","Pengisi, pengikat, pelincir, penyalut (bila perlu)","Pengisi, pengikat, penghancur, penyalut (bila perlu)","Pengisi, pengikat, pembasah, pelarut","Pengisi, pengikat, pembasah, penyalut (bila perlu)"],a:4,e:"Pelincir dan penghancur adalah eksipien tablet, bukan pil."},
+{t:"t9",f:"UAS",s:R,q:"Pasta berlemak mengandung > 50% zat padat; pasta kering adalah pasta bebas lemak yang mengandung ±60% zat padat.",o:["Benar","Salah"],a:0,e:"Sesuai slide Unguentum III."},
+{t:"t8",f:"UAS",s:R,q:"Pil berisi obat cair (bukan pengikat berair) dalam jumlah sedikit: ditambah adsorben/pengisi liquiritiae radix ±2 g untuk 30 pil, pengikat succus 1 g, bila perlu aqua glycerinata.",o:["Benar","Salah"],a:0,e:"Sesuai slide Pilulae."},
+{t:"t8",f:"UAS",s:R,q:"Pil berisi zat higroskopis (Na salisilat) digerus halus di mortir panas, ditambah succus + radix 1,5 g per 7 g garam, dan pembasahnya dapat dipakai aqua glycerinata.",o:["Benar","Salah"],a:1,e:"Untuk pil higroskopis, pembasah jangan aqua glycerinata."},
+{t:"t8",f:"UAS",s:R,q:"Penyalutan pil untuk menghindari oksidasi dapat memakai balsamum tolutanum 1 bagian dalam 9 bagian kloroform, dikocok dalam botol mulut lebar lalu digerakkan di piring sampai kering.",o:["Benar","Salah"],a:0,e:"Sesuai slide Pilulae."},
+{t:"t9",f:"UAS",s:R,q:"Mikstur gojog (mixturae agitandae) merupakan suatu bentuk emulsi dari zat padat dalam cairan (air, gliserin, alkohol).",o:["Benar","Salah"],a:1,e:"Mikstur gojog adalah suspensi, bukan emulsi."},
+{t:"t8",f:"UAS",s:R,q:"Pil kecil ±30 mg disebut boli, dan pil besar > 500 mg disebut granula.",o:["Benar","Salah"],a:1,e:"Terbalik: ±30 mg = granula, > 500 mg = boli."},
+{t:"t8",f:"UAS",s:R,q:"Zat pengisi pil memperbesar volume pil, misalnya liquiritiae radix, saccharum lactis; untuk oksidator dipakai bolus alba.",o:["Benar","Salah"],a:0,e:"Sesuai slide Pilulae."},
+{t:"t8",f:"UAS",s:R,q:"Massa pil dibuat dengan menghaluskan zat aktif, pengisi, pengikat, mencampur homogen, lalu ditetesi pembasah (aqua glycerinata) sambil digerus dan ditekan sampai plastis.",o:["Benar","Salah"],a:0,e:"Sesuai slide Pilulae."},
+// ---------- Latihan modul (dibuat dari slide) ----------
+{t:"t1",f:"UTS",s:L,q:"Obat keras termasuk golongan daftar:",o:["O","G","W","P"],a:1,e:"G = gevaarlijk (berbahaya)."},
+{t:"t1",f:"UTS",s:L,q:"Tanda peringatan P3 berbunyi:",o:["Hanya untuk kumur, jangan ditelan","Hanya untuk bagian luar badan","Hanya untuk dibakar","Obat wasir, jangan ditelan"],a:1,e:"P2 kumur · P3 bagian luar · P4 dibakar · P6 wasir."},
+{t:"t1",f:"UTS",s:L,q:"Yang TIDAK boleh ada pada resep narkotika:",o:["Alamat pasien","Nama pasien","Tanda iter","Aturan pakai yang jelas"],a:2,e:"Resep narkotika tidak boleh diulang, jadi tidak boleh ada iter."},
+{t:"t1",f:"UTS",s:L,q:"Bobot suppositoria vaginal (ovula) adalah:",o:["2 g","3 g","4 g","5 g"],a:3,e:"Ovula 5 g; supp. anal dewasa 2 g; bacilla pria 4 g."},
+{t:"t2",f:"UTS",s:L,q:"Arti “m.f. pulv. d.t.d. No. X” adalah:",o:["Campur, buat 10 bungkus dari jumlah total di resep","Campur, buat serbuk dengan takaran tersebut sebanyak 10 bungkus","Campur dan berikan dalam 10 kapsul","Campur, buat serbuk, berikan 10 kali sehari"],a:1,e:"d.t.d. = da tales doses: jumlah di resep adalah takaran per bungkus."},
+{t:"t2",f:"UTS",s:L,q:"Angka Romawi XL berarti:",o:["60","40","15","90"],a:1,e:"L = 50, X di kiri berarti dikurangi: 50 − 10 = 40."},
+{t:"t2",f:"UTS",s:L,q:"“p.c.” pada signatura berarti:",o:["Sebelum makan","Sesudah makan","Bila perlu","Pagi hari"],a:1,e:"p.c. = post coenam. a.c. = ante cibum (sebelum makan)."},
+{t:"t2",f:"UTS",s:L,q:"Tanda yang ditulis bila dokter tidak ingin resepnya diulang:",o:["Iter","n.i.","Cito","p.p."],a:1,e:"n.i. = ne iteretur."},
+{t:"t2",f:"UTS",s:L,q:"Tanda p.i.m. pada resep berarti:",o:["Untuk orang miskin","Bahaya bila ditunda","Untuk dipakai sendiri","Dibuat baru"],a:1,e:"p.i.m. = periculum in mora. p.p. = pro paupere; m.i. = mihi ipsi."},
+{t:"t2",f:"UTS",s:L,q:"Signatura “S. 3 d.d. C I” berarti:",o:["3 kali sehari 1 sendok teh","3 kali sehari 1 sendok makan (15 ml)","3 hari sekali 1 sendok makan","3 kali sehari 1 kapsul"],a:1,e:"C = cochlear (sendok makan, 15 ml); cth = sendok teh (5 ml)."},
+{t:"t2",f:"UTS",s:L,q:"“R/ Acid. salicyl. 0,600 · Sulfur ppt 1,200 · Vaselin flavum ad 30”. Jumlah vaselin yang ditimbang:",o:["30 g","28,2 g","27 g","31,8 g"],a:1,e:"ad 30 = sampai total 30 g → 30 − 0,6 − 1,2 = 28,2 g."},
+{t:"t3",f:"UTS",s:L,q:"Dosis dewasa obat A 5 g. Dosis untuk anak 3 tahun menurut Young:",o:["0,5 g","1 g","1,25 g","1,5 g"],a:1,e:"3/(3+12) × 5 g = 1 g."},
+{t:"t3",f:"UTS",s:L,q:"Dosis dewasa parasetamol 500 mg sekali. Dosis anak 11 tahun menurut Dilling:",o:["250 mg","275 mg","229 mg","300 mg"],a:1,e:"11/20 × 500 = 275 mg."},
+{t:"t3",f:"UTS",s:L,q:"Dosis dewasa parasetamol 500 mg. Dosis bayi 5 bulan menurut Fried:",o:["16,7 mg","25 mg","33,3 mg","50 mg"],a:0,e:"5/150 × 500 = 16,7 mg."},
+{t:"t3",f:"UTS",s:L,q:"Dosis dewasa obat A 50 mg. Dosis anak dengan LPT 0,57 m²:",o:["11,4 mg","16,5 mg","28,5 mg","8,7 mg"],a:1,e:"0,57/1,73 × 50 = 16,5 mg."},
+{t:"t3",f:"UTS",s:L,q:"R/ Atropin sulfat 1,5 mg, m.f. pulv. d.t.d. No. X, S. 4 d.d. pulv. I (DM 2 mg/4 mg). Kesimpulannya:",o:["DM sekali dan sehari tidak terlampaui","DM sekali terlampaui","DM sehari terlampaui (150%)","Keduanya terlampaui"],a:2,e:"Sekali 1,5/2 = 75%; sehari 6/4 = 150% → terlampaui, dokter harus memberi tanda seru + paraf."},
+{t:"t3",f:"UTS",s:L,q:"Menurut FI III, dosis pasien usia 75 tahun adalah:",o:["4/5 dosis dewasa","3/4 dosis dewasa","2/3 dosis dewasa","1/2 dosis dewasa"],a:1,e:"60–70: 4/5 · 70–80: 3/4 · 80–90: 2/3 · > 90: 1/2."},
+{t:"t3",f:"UTS",s:L,q:"Atropin 0,25 mg/bungkus (DM 1/3 mg) dan ekstrak belladon 10 mg/bungkus (DM 20/80 mg), S. t.d.d. Persen DM gabungan sehari adalah:",o:["75%","87,5%","112,5%","62,5%"],a:3,e:"Sehari atropin 3 × 0,25 = 0,75 mg → 0,75/3 = 25%. Belladon 3 × 10 = 30 mg → 30/80 = 37,5%. Gabungan 62,5% (tidak terlampaui)."},
+{t:"t4",f:"UTS",s:L,q:"CTM 5 mg diencerkan 1:50 (50 mg CTM + 2450 mg SL). Hasil pengenceran yang diambil:",o:["50 mg","100 mg","250 mg","500 mg"],a:2,e:"(5/50) × 2500 = 250 mg."},
+{t:"t4",f:"UTS",s:L,q:"Captopril 20 mg diencerkan 1:10 (50 mg + 450 mg SL). Hasil pengenceran yang diambil:",o:["200 mg","20 mg","400 mg","250 mg"],a:0,e:"(20/50) × 500 = 200 mg."},
+{t:"t4",f:"UTS",s:L,q:"KMnO₄ dan iodium ditimbang di atas:",o:["Kertas perkamen","Gelas arloji dengan sendok porselen","Cawan penguap","Perkamen yang dioles parafin cair"],a:1,e:"Bahan yang rusak oleh zat organik ditimbang di gelas arloji dengan sendok porselen."},
+{t:"t4",f:"UTS",s:L,q:"Kepekaan timbangan miligram adalah:",o:["5 mg","50 mg","200 mg","1 mg"],a:0,e:"Miligram 5 mg · gram halus 50 mg · gram kasar 200 mg."},
+{t:"t4",f:"UTS",s:L,q:"Pada timbangan obat, anak timbangan diletakkan di:",o:["Kanan","Kiri","Tengah","Bebas"],a:1,e:"Anak timbangan kiri, bahan kanan."},
+{t:"t4",f:"UTS",s:L,q:"Ekstrak kental (spissum) ditimbang di atas:",o:["Gelas arloji","Perkamen yang dioles parafin cair","Cawan penguap tertutup","Kertas saring"],a:1,e:"Supaya ekstrak tidak lengket di kertas."},
+{t:"t6",f:"UAS",s:L,q:"Bedak tabur harus melewati ayakan:",o:["Mesh 40","Mesh 60","Mesh 100 (B40)","Mesh 200"],a:2,e:"Mesh 100 (B40); yang mengandung lemak B30."},
+{t:"t6",f:"UAS",s:L,q:"Contoh serbuk efflorescent yang sebaiknya dipakai bentuk anhidratnya:",o:["Talkum","Kafein","Bolus alba","Zn stearat"],a:1,e:"Atropin sulfat, kafein, kodein, kinin HCl, skopolamin HBr."},
+{t:"t7",f:"UAS",s:L,q:"Serbuk 325 mg per kapsul. Menurut Aturan Tujuh dipakai kapsul nomor:",o:["1","2","3","0"],a:1,e:"325/65 = 5 grain; 7 − 5 = 2 → kapsul no. 2."},
+{t:"t7",f:"UAS",s:L,q:"Gelatin tipe A diperoleh dari:",o:["Tulang sapi, hidrolisis basa","Kulit babi, hidrolisis asam","Tulang sapi, hidrolisis asam","Kulit sapi, hidrolisis basa"],a:1,e:"Tipe A: kulit babi, asam (pI 7–9). Tipe B: tulang sapi, basa (pI 4,8–5)."},
+{t:"t7",f:"UAS",s:L,q:"Obat yang TIDAK cocok diberikan dalam kapsul gelatin keras:",o:["Parasetamol","KCl","Amoksisilin","Kodein"],a:1,e:"Garam sangat mudah larut (KCl, KBr, NH₄Cl) membentuk larutan pekat yang mengiritasi lambung."},
+{t:"t7",f:"UAS",s:L,q:"Kadar air kapsul gelatin keras:",o:["2–5%","5–8%","12–16%","20–25%"],a:2,e:"12–16%; terlalu kering rapuh, terlalu lembap lembek."},
+{t:"t10",f:"UAS",s:L,q:"BUD maksimum racikan oral yang mengandung air (USP 795):",o:["7 hari suhu kamar","14 hari suhu 2–8 °C","30 hari suhu kamar","6 bulan"],a:1,e:"Oral berair: 14 hari di kulkas. Topikal berair/semisolid: 30 hari."},
+{t:"t10",f:"UAS",s:L,q:"Racikan puyer dari obat jadi dengan sisa ED 4 bulan. BUD-nya:",o:["1 bulan (25%)","4 bulan (= ED)","6 bulan","3 bulan"],a:1,e:"Skema slide: sisa ED < 6 bulan → BUD maks = ED."},
+{t:"t10",f:"UAS",s:L,q:"Racikan kapsul dari obat jadi dengan sisa ED 36 bulan. BUD-nya:",o:["9 bulan","6 bulan","3 bulan","36 bulan"],a:1,e:"25% × 36 = 9 bulan > 6 bulan → BUD = 6 bulan."},
+{t:"t10",f:"UAS",s:L,q:"Seftriakson 1 g yang sudah direkonstitusi, disimpan 2–8 °C, stabil selama:",o:["24 jam","4 hari","14 hari","30 hari"],a:1,e:"24 jam pada 25 °C; 4 hari pada 2–8 °C."},
+{t:"t10",f:"UAS",s:L,q:"BUD sediaan injeksi risiko kontaminasi sedang pada suhu kamar:",o:["48 jam","30 jam","24 jam","9 hari"],a:1,e:"Rendah 48 jam · sedang 30 jam · tinggi 24 jam (suhu kamar)."},
+{t:"t9",f:"UAS",s:L,q:"Kadar air dalam lanolin adalah:",o:["10%","25%","40%","60%"],a:1,e:"Lanolin = adeps lanae + 25% air."},
+{t:"t9",f:"UAS",s:L,q:"Bahan yang ditambahkan TERAKHIR pada basis salep yang sudah dingin:",o:["ZnO","Asam borat","Ichthammol","Cera flava"],a:2,e:"Ichthammol, tumenol, pix, minyak atsiri, kamfer, mentol, bals. peru, ol. iecoris aselli."},
+{t:"t8",f:"UAS",s:L,q:"Kodein basa dalam pil bersama NH₄Cl menyebabkan pil pecah karena terbentuk gas:",o:["CO₂","H₂","NH₃","O₂"],a:2,e:"Kodein basa lebih kuat dari garam amonium → NH₃ bebas."},
+{t:"t8",f:"UAS",s:L,q:"Waktu hancur pil tidak bersalut menurut FI III:",o:["5 menit","15 menit","30 menit","60 menit"],a:1,e:"Tidak bersalut 15 menit; bersalut 60 menit."},
+];
+
+// ===================== KASUS RESEP (simulasi baca resep) =====================
+const CASES = [
+{id:"c1", t:["t2","t3","t5","t7","t10"], fase:"UTS", title:"Kapsul racikan untuk Meta", tag:"Arsip UTS Bu Yaya",
+ head:["dr. Contoh, SIP 123/2024","Padang, 09-11"],
+ lines:["Codein tab.        ½","Pamol tab.          ⅕","Efedrin HCl         10 mg","m.f. pulv. da in caps. d.t.d. No. XII","S. t.d.d. caps. I"],
+ pro:"Pro: Meta · 6 tahun 3 bulan",
+ info:"Tablet kodein HCl 10 mg (bobot 100 mg) · tablet parasetamol 500 mg (bobot 700 mg) · DM kodein 60/300 mg · DM efedrin HCl 50/150 mg",
+ steps:[
+  {q:"Terjemahkan resep ini.", a:`<p>Ambillah ½ tablet kodein, ⅕ tablet parasetamol, dan efedrin HCl 10 mg. Campur, buat serbuk, masukkan ke kapsul, dengan takaran tersebut sebanyak 12 kapsul. Tandai: 3 kali sehari 1 kapsul.</p><p class="muted">Ada <b>d.t.d.</b> → jumlah di resep adalah takaran per kapsul.</p>`},
+  {q:"Berapa bahan yang harus diambil?", a:`<div class="formula">Kodein: ½ × 12 = 6 tablet → 6 × 100 = 600 mg serbuk</div><div class="formula">Pamol: ⅕ × 12 = 2,4 tablet → 2,4 × 700 = 1680 mg serbuk</div><div class="formula">Efedrin HCl: 10 × 12 = 120 mg</div><p class="muted">Pamol: gerus 3 tablet, timbang 1680 mg dari serbuknya. Efedrin 120 mg ≥ 50 mg → bisa ditimbang langsung.</p>`},
+  {q:"Cek dosis maksimum (anak 6 th 3 bln).", a:`<div class="formula">n = 6,25 (&lt; 8 th → Young) → 6,25/18,25 = 0,342</div><div class="tw"><table class="t"><thead><tr><th>Obat</th><th>Sekali</th><th>Sehari</th></tr></thead><tbody><tr><td>Kodein (5 mg)</td><td class="n">5/20,5 = 24,3%</td><td class="n">15/102,7 = 14,6%</td></tr><tr><td>Efedrin (10 mg)</td><td class="n">10/17,1 = 58,4%</td><td class="n">30/51,4 = 58,4%</td></tr></tbody></table></div><p><span class="pill ok">Aman</span> Semua &lt; 100%, tidak perlu tanda seru.</p>`},
+  {q:"Kapsul nomor berapa?", a:`<div class="formula">Total 600 + 1680 + 120 = 2400 mg → 200 mg/kapsul</div><div class="formula">200/65 = 3,08 grain → 7 − 3,08 = 3,92 ≈ 4 → kapsul no. 4</div>`},
+  {q:"Bagaimana cara meraciknya?", a:`<ol><li>Gerus tablet kodein (jumlah paling kecil) bersama efedrin HCl.</li><li>Tambahkan serbuk pamol sedikit demi sedikit (doubling-up) sampai homogen.</li><li>12 kapsul (&gt; 10): timbang serbuk, bagi dua sama berat, lalu bagi visual menjadi 12.</li><li>Isi kapsul no. 4, bersihkan, kemas, beri etiket.</li></ol>`},
+  {q:"Berapa BUD-nya?", a:`<p>Kapsul racikan dari obat jadi: cek ED tiap obat dan pakai yang paling dekat. Sisa ED &lt; 6 bulan → BUD = ED. Sisa &gt; 6 bulan → 25% × sisa, maksimal 6 bulan. Contoh: ED terdekat 12 bulan lagi → BUD 3 bulan.</p>`},
+ ]},
+{id:"c2", t:["t3","t5"], fase:"UTS", title:"Puyer untuk Mela", tag:"Arsip UTS Bu Yaya",
+ head:["dr. Contoh, SIP 123/2024","Padang, 09-11"],
+ lines:["Piridoksin HCl      0,6","Pamol tab.          III","Efedrin HCl tab.    V","Aminofilin          1,2","m.f. pulv. No. XII","S. t.d.d. pulv. I p.c."],
+ pro:"Pro: Mela · 8 tahun 5 bulan",
+ info:"DM efedrin HCl 50/150 mg · DM aminofilin 500/1500 mg · tablet efedrin HCl 10 mg (bobot 100 mg) · bobot tablet parasetamol 700 mg",
+ steps:[
+  {q:"Total atau per bungkus?", a:`<p><b>Tidak ada d.t.d.</b> → semua angka adalah jumlah total untuk 12 bungkus. Angka tanpa satuan = gram.</p>`},
+  {q:"Bahan yang diambil", a:`<div class="formula">Piridoksin 0,6 g = 600 mg · Pamol 3 tablet = 2100 mg serbuk</div><div class="formula">Efedrin 5 tablet = 500 mg serbuk (50 mg zat) · Aminofilin 1,2 g = 1200 mg</div>`},
+  {q:"Cek DM efedrin & aminofilin", a:`<div class="formula">n = 8,42 (&gt; 8 th → Dilling) → 8,42/20 = 0,421</div><div class="tw"><table class="t"><thead><tr><th>Obat / bungkus</th><th>Sekali</th><th>Sehari</th></tr></thead><tbody><tr><td>Efedrin 4,17 mg</td><td class="n">4,17/21,05 = 19,8%</td><td class="n">12,5/63,2 = 19,8%</td></tr><tr><td>Aminofilin 100 mg</td><td class="n">100/210,5 = 47,5%</td><td class="n">300/631,5 = 47,5%</td></tr></tbody></table></div>`},
+  {q:"Bobot bungkus 400 mg. Berapa laktosa?", a:`<div class="formula">Bahan: 600 + 2100 + 500 + 1200 = 4400 mg → 366,7 mg/bungkus</div><div class="formula">Laktosa: (400 − 366,7) × 12 = 400 mg total (33,3 mg/bungkus)</div><p class="muted">Catatan tulisan tangan di arsip menulis 100 mg; hitungan dari data soal menghasilkan 400 mg.</p>`},
+  {q:"Cara membagi", a:`<p>12 bungkus (&gt; 10) → timbang seluruh serbuk, bagi dua sama berat, lalu bagi visual. %DM &lt; 80%, jadi tidak perlu ditimbang satu per satu.</p>`},
+ ]},
+{id:"c3", t:["t3","t4"], fase:"UTS", title:"Atropin & tanda seru", tag:"Slide Dosis",
+ head:["dr. Contoh, SIP 123/2024","Padang, 09-11"],
+ lines:["Atropini sulfas     1,5 mg","Sacch. lactis       q.s.","m.f. pulv. d.t.d. No. X","S. 4 d.d. pulv. I"],
+ pro:"Pro: Tn. A · dewasa",
+ info:"DM atropin sulfat 2 mg sekali / 4 mg sehari",
+ steps:[
+  {q:"Hitung % DM", a:`<div class="formula">Sekali: 1,5/2 = 75% · Sehari: 4 × 1,5 = 6 mg → 6/4 = 150%</div><p><span class="pill bad">DM sehari terlampaui</span></p>`},
+  {q:"Apa tindakan apoteker?", a:`<p>Lihat apakah di belakang atropin ada <b>tanda seru (!) dan paraf</b> dokter. Jika ada, obat boleh dibuat. Jika tidak ada, obat <b>tidak dibuat</b> dan apoteker menanyakan kembali ke dokter penulis resep.</p>`},
+  {q:"Bagaimana menimbang atropin?", a:`<div class="formula">Total atropin = 1,5 × 10 = 15 mg (10–50 mg → pengenceran 1:10)</div><div class="formula">50 mg atropin + 450 mg SL = 500 mg → ambil 15/50 × 500 = 150 mg</div><p class="muted">Gerus atropin di lumpang yang sudah dialasi SL (obat keras), boleh tambah pewarna kontras supaya terlihat homogen.</p>`},
+ ]},
+{id:"c4", t:["t9","t10"], fase:"UAS", title:"Salep prokain–ZnO", tag:"Slide Unguentum I · arsip Bu Rahmi",
+ head:["dr. Contoh, SIP 123/2024","Padang, 09-11"],
+ lines:["Procain HCl          0,100","Aq. Rosae            1","Adeps Lanae          3","Zinci Oxyd.          3","Vaselin ad           30","m.d.s. us. ext."],
+ pro:"Pro: Ny. B · dewasa", info:"",
+ steps:[
+  {q:"Terjemahkan & hitung vaselin", a:`<p>Campur, serahkan, tandai: untuk pemakaian luar.</p><div class="formula">Vaselin = 30 − (0,1 + 1 + 3 + 3) = 22,9 g</div>`},
+  {q:"Aturan umum apa yang dipakai?", a:`<ul><li>Prokain HCl mudah larut air → <b>aturan II</b>: larutkan dalam aq. rosae.</li><li>ZnO tidak larut → <b>aturan III</b>: ayak no. 100 dulu, baru ditimbang.</li></ul>`},
+  {q:"Urutan kerja", a:`<ol><li>Ayak ZnO, timbang 3 g.</li><li>Larutkan prokain HCl dalam aq. rosae (massa I).</li><li>Campur massa I dengan adeps lanae (dasar serap) sampai air terserap.</li><li>Gerus ZnO dengan vaselin sama banyak sampai homogen.</li><li>Gabungkan, tambahkan sisa vaselin sedikit demi sedikit, gerus homogen.</li><li>Uji homogenitas: oles tipis di kaca.</li></ol>`},
+  {q:"BUD & kemasan", a:`<p>Sediaan setengah padat yang mengandung air → BUD maks <b>30 hari</b>. Kemas dalam pot/tube, beri etiket obat luar.</p>`},
+ ]},
+{id:"c5", t:["t9"], fase:"UAS", title:"Salep penisilin", tag:"Slide Unguentum III · arsip Bu Rahmi",
+ head:["dr. Contoh, SIP 123/2024","Padang, 09-11"],
+ lines:["Penicillini          100.000 U","Adipis Lanae         1","Paraff. liquid.      2","Vaselini flavi       7"],
+ pro:"Pro: An. C", info:"Tersedia vial penisilin 500.000 U",
+ steps:[
+  {q:"Kenapa seluruh isi vial dipakai?", a:`<p>Serbuk penisilin sebagian lengket di botol. Vaselin dipakai untuk "mengambil" sisa serbuk dari botol, lalu digerus dengan serbuk yang sudah dikeluarkan.</p>`},
+  {q:"Buat campuran yang kadarnya diketahui", a:`<div class="formula">500.000 U + vaselin flavum ad 10 g → 50.000 U per gram</div>`},
+  {q:"Berapa gram campuran & vaselin?", a:`<div class="formula">100.000 U ÷ 50.000 U/g = 2 g campuran</div><div class="formula">Vaselin tambahan = 7 − 2 = 5 g</div>`},
+  {q:"Urutan kerja", a:`<ol><li>Timbang 2 g campuran penisilin (massa I).</li><li>Lebur adeps lanae + 5 g vaselin + parafin cair di lumpang panas, aduk sampai dingin (massa II).</li><li>Campur massa I dan II sampai homogen.</li></ol><p class="muted">Antibiotik cepat rusak dalam air → pakai basis anhidrat.</p>`},
+ ]},
+{id:"c6", t:["t7"], fase:"UAS", title:"Kapsul HCT–triamteren", tag:"Slide Kapsul · arsip Bu Yaya",
+ head:["dr. Contoh, SIP 123/2024","Padang, 09-11"],
+ lines:["HCT                 20 mg","Triamteren          40 mg","Laktosa             q.s.","m.f. pulv. d.t.d. No. X da in caps.","S. b.d.d. caps. I"],
+ pro:"Pro: Tn. D", info:"Tersedia tablet HCT 50 mg dan tablet triamteren 50 mg",
+ steps:[
+  {q:"Berapa tablet?", a:`<div class="formula">HCT 20 × 10 = 200 mg ÷ 50 = 4 tablet · Triamteren 40 × 10 = 400 mg ÷ 50 = 8 tablet</div>`},
+  {q:"Kapsul nomor? (bobot HCT 150 mg, triamteren 250 mg)", a:`<div class="formula">4 × 150 + 8 × 250 = 2600 mg ÷ 10 = 260 mg = 4 grain → 7 − 4 = 3 → kapsul no. 3</div>`},
+  {q:"Variasi slide: triamteren berbobot 200 mg", a:`<div class="formula">4 × 150 + 8 × 200 = 2200 mg ÷ 10 = 220 mg = 3,38 grain → 7 − 3,38 = 3,62 ≈ 4 → kapsul no. 4</div><p class="muted">Laktosa q.s. hanya ditambahkan bila kapsul belum penuh.</p>`},
+ ]},
+{id:"c7", t:["t8"], fase:"UAS", title:"Pil KMnO₄ (oksidator)", tag:"Slide Pilulae",
+ head:["dr. Contoh, SIP 123/2024","Padang, 09-11"],
+ lines:["Kalii Permanganas    0,1","Natrii Bicarb.       0,05","Bol. alba            0,05","Vaselini albi        q.s.","m.f. pil. d.t.d. No. XXX","S. 3 d.d. p. I"],
+ pro:"Pro: Tn. E", info:"",
+ steps:[
+  {q:"Kenapa pakai bolus alba & vaselin?", a:`<p>KMnO₄ oksidator: rusak oleh bahan organik (radix, succus). Pengisi diganti <b>bolus alba</b>, pengikat <b>vaselin/adeps lanae</b>.</p>`},
+  {q:"Hitung bahan untuk 30 pil", a:`<div class="formula">KMnO₄ 0,1 × 30 = 3 g · NaHCO₃ 0,05 × 30 = 1,5 g · Bolus alba 0,05 × 30 = 1,5 g</div><div class="formula">Zat padat 6 g → vaselin ≈ ⅙ × 6 = 1 g</div>`},
+  {q:"Apa fungsi NaHCO₃ di sini?", a:`<p>Di lambung, NaHCO₃ bereaksi dengan asam lambung dan melepas CO₂ sehingga pil pecah.</p>`},
+  {q:"Cara kerja", a:`<p>Timbang KMnO₄ di gelas arloji dengan sendok porselen. Campur serbuk, tambahkan vaselin sedikit demi sedikit sambil digerus dan ditekan sampai terbentuk massa pil, lalu gulung, potong, bulatkan.</p>`},
+ ]},
+];
+
+// ===================== LATIHAN ESAI (Soal Latihan 2 Bu Yaya) =====================
+// a: petunjuk jawaban dari slide; null = belum ada di slide folder ini
+const ESSAY = [
+ ["Tuliskan macam-macam istilah kelarutan",null],["Tuliskan istilah-istilah yang berkaitan dengan suhu",null],["Tuliskan macam-macam wadah",null],["Tuliskan macam-macam tangas",null],["Tuliskan beberapa cara penyimpanan",null],
+ ["Persyaratan resep yang mengandung obat golongan narkotika","Ditulis tersendiri, tidak boleh iter, wajib nama & alamat pasien, tidak boleh m.i., aturan pakai harus jelas (tidak boleh u.c./p.r.n.). Lihat Langkah 1 & 2."],
+ ["Apa yang dimaksud dengan kedaluwarsa, Beyond Use Date, Period after opening","ED dan BUD ada di Langkah 10. Period after opening belum ada di slide."],
+ ["Tuliskan jenis-jenis sendok","Sendok makan (C) 15 ml, sendok teh (cth) 5 ml. Lihat Langkah 3."],
+ ["Siapa saja yang boleh menulis resep","Dokter, dokter gigi, dokter hewan yang punya izin praktik (resep drh hanya untuk hewan)."],
+ ["Siapa saja yang boleh melihat resep",null],
+ ["Tuliskan bagian-bagian resep","Inscriptio, invocatio, praescriptio/ordonatio, signatura, subscriptio. Perhatikan dua versi penamaan di Langkah 2."],
+ ["Tanda apa yang ditulis dokter bila sengaja memberi dosis melebihi DM?","Tanda seru (!) disertai paraf di belakang nama obat. Lihat Langkah 3."],
+ ["Berapa lama resep diarsipkan di apotek?",null],["Bagaimana cara pemusnahan resep",null],["Data apa yang ditulis dalam berita acara pemusnahan resep",null],["Bagaimana cara pemusnahan obat",null],["Data apa yang dituliskan dalam berita acara pemusnahan obat",null],
+ ["Tuliskan macam-macam tanda khusus pada resep (n.i., iter, cito, statim, p.i.m., urgent)","Lihat Langkah 2 dan kartu singkatan Latin."],
+ ["Kapan ditulis copy resep",null],["Tuliskan bagian-bagian copy resep",null],["Mengapa umumnya resep ditulis dengan bahasa Latin?",null],["Tuliskan bagian-bagian etiket",null],
+ ["Untuk obat rute apa etiket berwarna putih diberikan?",null],["Untuk obat rute apa etiket berwarna biru diberikan?",null],
+ ["Cara penyerahan obat bebas & bebas terbatas tanpa resep dan dengan resep","Obat bebas terbatas diserahkan dalam bungkus asli. Bagian dengan resep belum ada di slide."],
+ ["Siapa saja yang boleh meracik obat?",null],
+ ["Macam-macam rute pemberian obat dan bentuk sediaannya","Oral, topikal, rektal/vaginal/uretral, sublingual/bukal, parenteral, nasal/aural/okular. Lihat Langkah 1."],
+ ["Apa yang dimaksud dengan kepekaan timbangan","Tambahan bobot maksimum pada satu piring (keduanya berisi muatan maksimum) yang membuat jarum bergeser ≥ 2 mm tiap dm. Lihat Langkah 4."],
+ ["Hal yang harus diperhatikan sebelum mulai menimbang","Meja datar (waterpass), lengan datar & jarum di tengah, piring seimbang, alas perkamen. Lihat Langkah 4."],
+ ["Tuliskan BUD dari berbagai bentuk sediaan","Lihat tabel USP 795 di Langkah 10."],
+];
+
+// ===================== STATE =====================
+const KEY="po-modul-v1";
+let S={done:{},quiz:{},known:{}};
+try{const raw=localStorage.getItem(KEY); if(raw){const p=JSON.parse(raw); S={done:p.done||{},quiz:p.quiz||{},known:p.known||{}};}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+
+const $=(s,el=document)=>el.querySelector(s);
+const $$=(s,el=document)=>Array.from(el.querySelectorAll(s));
+const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const fmt=(n,d=2)=>{if(!isFinite(n))return "–";const r=Math.round(n*Math.pow(10,d))/Math.pow(10,d);return r.toLocaleString("id-ID",{maximumFractionDigits:d});};
+const num=v=>{if(v===undefined||v===null)return NaN;const s=String(v).trim().replace(",",".");return s===""?NaN:parseFloat(s);};
+const TBY=Object.fromEntries(TOPICS.map(t=>[t.id,t]));
+TBY.t2.cards=LATIN.map(([a,b])=>[a,b]).concat([
+ ["Bagian resep: Inscriptio","Identitas dokter (nama, alamat, SIP), kota & tanggal (versi slide “Hal yang harus ada”)."],
+ ["Bagian resep: Invocatio","Tanda R/ (recipe = ambillah) di kiri tiap resep."],
+ ["Bagian resep: Signatura","Aturan pakai untuk pasien (S. ...)."],
+ ["Bagian resep: Subscriptio","Paraf/tanda tangan dokter (versi “Hal yang harus ada”); di versi tabel = petunjuk peracik."],
+ ["Formula magistrales","Racikan yang komposisinya ditulis dokter (compounded)."],
+ ["Formula officinales","Obat jadi/sediaan standar pabrik (pre-compounded)."],
+]);
+const cardKey=(tid,i)=>tid+":"+i;
+
+// ===================== ICONS =====================
+const IC={
+ map:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg>',
+ rx:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l3 3v15H6z"/><path d="M9 9h3a2 2 0 0 1 0 4H9V8M11 13l4 5M15 13l-4 5"/></svg>',
+ calc:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 12h2M14 12h2M8 16h2M14 16h2"/></svg>',
+ card:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="14" height="12" rx="2"/><path d="M7 3h12a2 2 0 0 1 2 2v10"/></svg>',
+ quiz:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5v.01"/></svg>',
+ sun:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+ moon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10z"/></svg>',
+};
+
+// ===================== THEME =====================
+function curTheme(){const a=document.documentElement.getAttribute("data-theme");if(a)return a;return matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";}
+function paintThemeBtn(){const b=$("#themeBtn");if(!b)return;const d=curTheme()==="dark";b.innerHTML=d?IC.sun:IC.moon;b.setAttribute("aria-label",d?"Ganti ke tema terang":"Ganti ke tema gelap");}
+document.addEventListener("click",e=>{if(e.target.closest("#themeBtn")){document.documentElement.setAttribute("data-theme",curTheme()==="dark"?"light":"dark");paintThemeBtn();}});
+
+// ===================== ROUTER =====================
+const VIEWS=["peta","kasus","alat","kartu","kuis"];
+function route(){
+ const h=(location.hash||"#peta").slice(1);
+ const app=$("#app");
+ $$(".nav a").forEach(a=>a.removeAttribute("aria-current"));
+ let nav=h;
+ if(TBY[h]){renderTopic(app,TBY[h]);nav="peta";}
+ else if(h==="kuis"){renderQuizView(app);}
+ else if(h==="alat"){renderTools(app);}
+ else if(h==="kartu"){renderCardsView(app);}
+ else if(h==="kasus"){renderCasesView(app);}
+ else {renderMap(app);nav="peta";}
+ const a=$(`.nav a[href="#${nav}"]`);if(a)a.setAttribute("aria-current","page");
+ window.scrollTo(0,0);
+}
+window.addEventListener("hashchange",route);
+
+// ===================== MAP =====================
+function quizStat(tid){const q=S.quiz[tid];return q?Math.round(q.best):null;}
+function renderMap(app){
+ const nU=TOPICS.filter(t=>t.fase==="UTS").length,nA=TOPICS.length-nU;
+ const dU=TOPICS.filter(t=>t.fase==="UTS"&&S.done[t.id]).length,dA=TOPICS.filter(t=>t.fase==="UAS"&&S.done[t.id]).length;
+ const tot=TOPICS.length;
+ const phase=(f,label,sub)=>{
+  const list=TOPICS.filter(t=>t.fase===f);
+  const stops=list.map(t=>{
+   const qs=quizStat(t.id),nq=QUIZ.filter(q=>q.t===t.id).length;
+   const feats=[`${t.cards.length} kartu`,t.tools.length?"alat hitung":null,t.cases.length?`${t.cases.length} kasus`:null,`${nq} soal`].filter(Boolean);
+   return `<li class="stop ${S.done[t.id]?"done":""}"><div class="cap" aria-hidden="true"><span>${t.no}</span><span>${S.done[t.id]?"✓":""}</span></div>
+   <a class="stopcard" href="#${t.id}"><h3>${esc(t.title)}</h3><p>${esc(t.short)}</p><div class="chips">
+   ${S.done[t.id]?'<span class="chip ok">Sudah paham</span>':'<span class="chip st">Belum ditandai</span>'}
+   ${qs!==null?`<span class="chip ${qs>=70?"ok":"warn"}">Kuis terbaik ${qs}%</span>`:""}
+   ${feats.map(x=>`<span class="chip">${x}</span>`).join("")}</div></a></li>`;}).join("");
+  const nq=QUIZ.filter(q=>q.f===f).length;
+  return `<section class="phase ${f.toLowerCase()}" aria-labelledby="ph-${f}"><div class="phasehead"><h2 id="ph-${f}">${label}</h2><span class="tag">${sub}</span></div>
+  <ol class="route">${stops}<li class="stop checkpoint"><div class="cap" aria-hidden="true"><span>✦</span><span></span></div>
+  <a class="stopcard" href="#kuis" data-preset="${f}"><h3>Simulasi ${f}</h3><p>${nq} soal campuran fase ${f}, bisa difilter per dosen (gaya soal Bu Yaya, Bu Rahmi, atau latihan modul).</p><div class="chips"><span class="chip st">Checkpoint</span></div></a></li></ol></section>`;
+ };
+ app.innerHTML=`<div class="view">
+ <section class="hero"><span class="eyebrow">Modul tutor · Peracikan Obat · Farmasi</span>
+ <h1>Dari membaca <em>R/</em> sampai meracik salep</h1>
+ <p class="lead">Satu jalur belajar untuk UTS dan UAS. Kerjakan berurutan: dasar resep, dosis, dan penimbangan di fase UTS dipakai lagi di semua materi UAS.</p>
+ <p class="byline">Created by <b>apt. Bahrain Daffaroos, S.Farm</b></p>
+ <div class="progressrow"><div class="bar" role="img" aria-label="Progres ${dU+dA} dari ${tot} langkah"><i class="u" style="width:${dU/tot*100}%"></i><i class="a" style="width:${dA/tot*100}%"></i></div>
+ <span class="mono">${dU+dA}/${tot} langkah dipahami</span></div>
+ <div class="howto"><div><b>1 · Baca inti</b><span>Ringkasan slide + jebakan ujian</span></div><div><b>2 · Hafal</b><span>Kartu bolak-balik</span></div><div><b>3 · Hitung</b><span>Alat hitung & kasus resep</span></div><div><b>4 · Uji</b><span>Soal arsip + pembahasan</span></div></div>
+ </section>
+ ${phase("UTS","Fase UTS",`${dU}/${nU} langkah · fondasi`)}
+ ${phase("UAS","Fase UAS",`${dA}/${nA} langkah · sediaan`)}
+ <p class="foot">Progres tersimpan di browser perangkat ini saja. Sumber: slide & arsip soal di folder Peracikan Obat. Bagian bertanda <span class="chip warn">Cek ke dosen</span> berisi perbedaan antara slide/arsip dan hitungan ulang.</p>
+ </div>`;
+ $$('[data-preset]',app).forEach(a=>a.addEventListener("click",()=>{QZ.preset={f:a.dataset.preset};}));
+}
+
+// ===================== TOPIC =====================
+let TOPIC_TAB={};
+function renderTopic(app,t){
+ const idx=TOPICS.indexOf(t),prev=TOPICS[idx-1],next=TOPICS[idx+1];
+ const nq=QUIZ.filter(q=>q.t===t.id).length;
+ const tabs=[["inti","Inti materi",""],["kartu","Kartu",t.cards.length]];
+ if(t.tools.length)tabs.push(["hitung","Alat hitung",t.tools.length]);
+ if(t.cases.length)tabs.push(["kasus","Kasus resep",t.cases.length]);
+ tabs.push(["kuis","Kuis",nq]);
+ const cur=TOPIC_TAB[t.id]||"inti";
+ app.innerHTML=`<div class="view ${t.fase.toLowerCase()}">
+ <nav class="crumb" aria-label="Lokasi"><a href="#peta">Peta belajar</a><span>›</span><span>Fase ${t.fase} · Langkah ${t.no}</span></nav>
+ <header class="thead"><span class="eyebrow">Langkah ${t.no} · Fase ${t.fase}</span><h1>${esc(t.title)}</h1><p>${esc(t.short)}</p><p class="src">Sumber slide: ${esc(t.src)}</p></header>
+ <div class="tabs" role="tablist">${tabs.map(([k,l,n])=>`<button role="tab" data-tab="${k}" aria-selected="${k===cur}">${l}${n!==""?` <span class="n">${n}</span>`:""}</button>`).join("")}</div>
+ <div id="tpanel" class="panel"></div>
+ <div class="tnav">${prev?`<a class="btn" href="#${prev.id}">← ${esc(prev.title)}</a>`:'<span></span>'}
+ <button class="btn ${S.done[t.id]?"done":"pri"}" id="doneBtn">${S.done[t.id]?"✓ Sudah paham":"Tandai sudah paham"}</button>
+ ${next?`<a class="btn" href="#${next.id}">${esc(next.title)} →</a>`:'<a class="btn" href="#kuis">Simulasi ujian →</a>'}</div></div>`;
+ const showTab=k=>{TOPIC_TAB[t.id]=k;$$(".tabs button",app).forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===k));drawTab(k);};
+ const drawTab=k=>{
+  const p=$("#tpanel",app);
+  if(k==="inti"){
+   p.innerHTML=t.blocks.map(b=>`<section class="block ${b.cls||""}"><h3>${b.h}</h3>${b.html}</section>`).join("")+
+   `<section class="block trap"><h3>Jebakan ujian</h3><ul>${t.traps.map(x=>`<li>${x}</li>`).join("")}</ul></section>`;
+   const cv=$("#capsvizStatic",p);if(cv)cv.innerHTML=capsViz(null);
+  } else if(k==="kartu"){ p.innerHTML=""; mountDeck(p,[t.id]); }
+  else if(k==="hitung"){ p.innerHTML=""; t.tools.forEach(id=>{const s=document.createElement("section");s.className="block tool";p.appendChild(s);TOOLS[id].render(s);}); }
+  else if(k==="kasus"){ p.innerHTML=""; t.cases.forEach(cid=>{const c=CASES.find(x=>x.id===cid);const s=document.createElement("section");s.className="block";p.appendChild(s);renderCase(s,c);}); }
+  else if(k==="kuis"){ p.innerHTML=""; const s=document.createElement("section");s.className="block";p.appendChild(s);startQuiz(s,{t:t.id},{inline:true,statKey:t.id}); }
+ };
+ $$(".tabs button",app).forEach(b=>b.addEventListener("click",()=>showTab(b.dataset.tab)));
+ $("#doneBtn",app).addEventListener("click",e=>{S.done[t.id]=!S.done[t.id];save();const b=e.currentTarget;b.className="btn "+(S.done[t.id]?"done":"pri");b.textContent=S.done[t.id]?"✓ Sudah paham":"Tandai sudah paham";});
+ drawTab(cur);
+}
+
+// ===================== QUIZ ENGINE =====================
+const QZ={preset:null};
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function filterQ(f){return QUIZ.filter(q=>(!f.t||q.t===f.t)&&(!f.f||q.f===f.f)&&(!f.s||q.s===f.s));}
+function startQuiz(el,f,opt={}){
+ let items=filterQ(f); if(opt.random)items=shuffle(items);
+ if(opt.only)items=opt.only;
+ const st={i:0,ans:[],items};
+ if(!items.length){el.innerHTML='<p class="empty">Tidak ada soal untuk filter ini.</p>';return;}
+ const draw=()=>{
+  if(st.i>=items.length){return summary();}
+  const q=items[st.i],T=TBY[q.t],answered=st.ans[st.i]!==undefined;
+  el.innerHTML=`<div class="qcard"><div class="qmeta"><span class="eyebrow">Soal ${st.i+1} dari ${items.length}</span>
+  <div class="chips"><span class="chip">${esc(q.s)}</span><span class="chip">L${T.no} · ${esc(T.title)}</span>${q.flag?'<span class="chip warn">Cek ke dosen</span>':""}</div></div>
+  ${items.length<=40?`<div class="dots" aria-hidden="true">${items.map((_,k)=>`<i class="${st.ans[k]===undefined?"":(st.ans[k]===items[k].a?"r":"w")} ${k===st.i?"c":""}"></i>`).join("")}</div>`:`<div class="qbar" aria-hidden="true"><i style="width:${(st.i)/items.length*100}%"></i></div>`}
+  ${q.ctx?`<div class="qctx mono">${esc(CTX[q.ctx])}</div>`:""}
+  <p class="qtext">${esc(q.q)}</p>
+  <div class="opts">${q.o.map((o,k)=>`<button class="opt" data-k="${k}"><span class="k">${"abcde"[k]}</span><span>${esc(o)}</span></button>`).join("")}</div>
+  <div id="qexp"></div>
+  <div class="tnav"><button class="btn sm" id="qprev" ${st.i===0?"disabled":""}>← Sebelumnya</button><button class="btn sm pri" id="qnext">${st.i===items.length-1?"Lihat skor":"Berikutnya →"}</button></div></div>`;
+  const mark=()=>{const a=st.ans[st.i];$$(".opt",el).forEach(b=>{const k=+b.dataset.k;b.disabled=true;if(k===q.a)b.classList.add("right");else if(k===a)b.classList.add("wrong");});
+   $("#qexp",el).innerHTML=`<div class="exp"><b>${a===q.a?"Benar.":"Belum tepat. Jawaban: "+"abcde"[q.a]+"."}</b><span>${esc(q.e)}</span>${q.flag?`<span class="flagnote">⚑ ${esc(q.flag)}</span>`:""}</div>`;};
+  if(answered)mark();
+  $$(".opt",el).forEach(b=>b.addEventListener("click",()=>{if(st.ans[st.i]!==undefined)return;st.ans[st.i]=+b.dataset.k;mark();}));
+  $("#qnext",el).addEventListener("click",()=>{st.i++;draw();el.scrollIntoView({block:"start",behavior:"smooth"});});
+  $("#qprev",el).addEventListener("click",()=>{if(st.i>0){st.i--;draw();}});
+ };
+ const summary=()=>{
+  const n=items.length,done=st.ans.filter(x=>x!==undefined).length,right=items.filter((q,k)=>st.ans[k]===q.a).length;
+  const pct=n?right/n*100:0;
+  if(opt.statKey){const prev=S.quiz[opt.statKey];S.quiz[opt.statKey]={best:Math.max(prev?prev.best:0,pct),n};save();}
+  const byT={};items.forEach((q,k)=>{byT[q.t]=byT[q.t]||{r:0,n:0};byT[q.t].n++;if(st.ans[k]===q.a)byT[q.t].r++;});
+  const wrong=items.filter((q,k)=>st.ans[k]!==q.a);
+  el.innerHTML=`<div class="qcard"><div class="score"><span class="big">${Math.round(pct)}%</span><div><b>${right} benar dari ${n} soal</b><br><span class="muted">${done<n?`${n-done} soal dilewati. `:""}${pct>=80?"Siap ujian untuk bagian ini.":pct>=60?"Hampir. Ulangi soal yang salah.":"Baca lagi inti materi dan kartu, lalu coba lagi."}</span></div></div>
+  ${Object.keys(byT).length>1?`<div class="tw"><table class="t"><thead><tr><th>Langkah</th><th>Benar</th></tr></thead><tbody>${Object.entries(byT).map(([tid,v])=>`<tr><td><a href="#${tid}">L${TBY[tid].no} · ${esc(TBY[tid].title)}</a></td><td class="n">${v.r}/${v.n}</td></tr>`).join("")}</tbody></table></div>`:""}
+  <div class="deckbtns">${wrong.length?'<button class="btn pri" id="qwrong">Ulangi yang salah ('+wrong.length+')</button>':""}<button class="btn" id="qagain">Ulangi semua (acak)</button></div></div>`;
+  const w=$("#qwrong",el);if(w)w.addEventListener("click",()=>startQuiz(el,f,{...opt,only:wrong}));
+  $("#qagain",el).addEventListener("click",()=>startQuiz(el,f,{...opt,only:null,random:true}));
+  if(opt.statKey&&location.hash.slice(1)===opt.statKey){}
+ };
+ draw();
+}
+function renderQuizView(app){
+ const p=QZ.preset||{};QZ.preset=null;
+ app.innerHTML=`<div class="view"><header class="thead" style="--ps:var(--uas-soft)"><span class="eyebrow">Simulasi ujian</span><h1>Bank soal</h1><p>${QUIZ.length} soal: arsip UTS (Bu Yaya), arsip UAS & kuis (Bu Rahmi), dan latihan modul dari slide. Tiap soal ada pembahasannya.</p></header>
+ <section class="block"><div class="filters">
+  <div class="field"><label>Fase</label><div class="seg" id="fF">${["","UTS","UAS"].map(v=>`<button data-v="${v}" aria-pressed="${(p.f||"")===v}">${v||"Semua"}</button>`).join("")}</div></div>
+  <div class="field"><label for="fS">Sumber / gaya soal</label><select id="fS"><option value="">Semua sumber</option><option>Bu Yaya</option><option>Bu Rahmi</option><option>Latihan modul</option></select></div>
+  <div class="field"><label for="fT">Langkah</label><select id="fT"><option value="">Semua langkah</option>${TOPICS.map(t=>`<option value="${t.id}">L${t.no} · ${esc(t.title)}</option>`).join("")}</select></div>
+  <div class="field"><label for="fR">Urutan</label><select id="fR"><option value="0">Sesuai arsip</option><option value="1">Acak</option></select></div>
+  <button class="btn pri" id="fGo">Mulai</button><span class="muted mono" id="fN"></span></div>
+  <p class="muted" style="font-size:.88rem">Arsip UTS Bu Yaya ternyata juga menguji bedak tabur, kapsul, dan BUD. Kalau UTS-mu dari Bu Yaya, pilih Sumber “Bu Yaya” dengan Fase “Semua”.</p></section>
+ <section class="block" id="qbox"></section>
+ <section class="block"><h3>Latihan esai (Soal Latihan 2 · Bu Yaya)</h3><p class="muted">Tulis jawabanmu dulu, lalu buka petunjuk. Soal tanpa petunjuk belum ada di slide folder ini; cari di catatan kuliah.</p>
+ <div class="essay">${ESSAY.map(([q,a],i)=>`<details><summary>${i+1}. ${esc(q)}</summary><p>${a?esc(a):"Belum ada di slide folder ini."}</p></details>`).join("")}</div></section></div>`;
+ let fF=p.f||"";
+ const upd=()=>{$("#fN",app).textContent=filterQ({f:fF,s:$("#fS",app).value,t:$("#fT",app).value}).length+" soal";};
+ $$("#fF button",app).forEach(b=>b.addEventListener("click",()=>{fF=b.dataset.v;$$("#fF button",app).forEach(x=>x.setAttribute("aria-pressed",x===b));upd();}));
+ ["#fS","#fT"].forEach(s=>$(s,app).addEventListener("change",upd));
+ const go=()=>startQuiz($("#qbox",app),{f:fF,s:$("#fS",app).value,t:$("#fT",app).value},{random:$("#fR",app).value==="1"});
+ $("#fGo",app).addEventListener("click",go);
+ upd();go();
+}
+
+// ===================== FLASHCARDS =====================
+function mountDeck(el,tids){
+ let cards=[];tids.forEach(tid=>TBY[tid].cards.forEach((c,i)=>cards.push({tid,i,f:c[0],b:c[1]})));
+ let order=cards.slice(),pos=0,onlyNew=false;
+ const draw=()=>{
+  const pool=onlyNew?order.filter(c=>!S.known[cardKey(c.tid,c.i)]):order;
+  const known=cards.filter(c=>S.known[cardKey(c.tid,c.i)]).length;
+  if(!pool.length){el.innerHTML=`<div class="deck"><p class="empty">Semua kartu di dek ini sudah hafal (${known}/${cards.length}).</p><div class="deckbtns"><button class="btn" id="dAll">Tampilkan semua kartu</button><button class="btn" id="dReset">Reset tanda hafal</button></div></div>`;
+   $("#dAll",el).onclick=()=>{onlyNew=false;pos=0;draw();};$("#dReset",el).onclick=()=>{cards.forEach(c=>delete S.known[cardKey(c.tid,c.i)]);save();draw();};return;}
+  if(pos>=pool.length)pos=0;
+  const c=pool[pos],k=cardKey(c.tid,c.i),T=TBY[c.tid];
+  el.innerHTML=`<div class="deck ${T.fase==="UAS"?"uas":"uts"}">
+  <div class="qmeta" style="width:100%;max-width:560px"><span class="eyebrow">Kartu ${pos+1}/${pool.length} · hafal ${known}/${cards.length}</span><label class="muted" style="font-size:.85rem;display:flex;gap:6px;align-items:center"><input type="checkbox" id="dNew" ${onlyNew?"checked":""}> Hanya yang belum hafal</label></div>
+  <button class="flip" id="dFlip" aria-label="Balik kartu"><div class="in"><div class="face f"><span class="lab">L${T.no} · ketuk untuk balik</span><div class="q">${esc(c.f)}</div></div><div class="face b"><span class="lab">Jawaban</span><div>${esc(c.b)}</div></div></div></button>
+  <div class="deckbtns"><button class="btn" id="dPrev">←</button><button class="btn" id="dNo">Belum hafal</button><button class="btn ${S.known[k]?"done":"pri"}" id="dYes">${S.known[k]?"✓ Hafal":"Sudah hafal"}</button><button class="btn" id="dNext">→</button></div>
+  <div class="deckbtns"><button class="btn sm" id="dShuf">Acak urutan</button></div></div>`;
+  const flip=$("#dFlip",el);flip.onclick=()=>flip.classList.toggle("on");
+  $("#dPrev",el).onclick=()=>{pos=(pos-1+pool.length)%pool.length;draw();};
+  $("#dNext",el).onclick=()=>{pos=(pos+1)%pool.length;draw();};
+  $("#dYes",el).onclick=()=>{S.known[k]=true;save();if(!onlyNew)pos=(pos+1)%pool.length;draw();};
+  $("#dNo",el).onclick=()=>{delete S.known[k];save();pos=(pos+1)%pool.length;draw();};
+  $("#dShuf",el).onclick=()=>{order=shuffle(order);pos=0;draw();};
+  $("#dNew",el).onchange=e=>{onlyNew=e.target.checked;pos=0;draw();};
+ };
+ el.onkeydown=e=>{if(e.target.tagName==="INPUT")return;if(e.key==="ArrowRight"){$("#dNext",el)?.click();}else if(e.key==="ArrowLeft"){$("#dPrev",el)?.click();}};
+ draw();
+}
+function renderCardsView(app){
+ const total=TOPICS.reduce((a,t)=>a+t.cards.length,0),known=Object.keys(S.known).length;
+ app.innerHTML=`<div class="view"><header class="thead" style="--ps:var(--uts-soft)"><span class="eyebrow">Hafalan</span><h1>Kartu bolak-balik</h1><p>${total} kartu, termasuk ${LATIN.length} singkatan Latin resep. Ketuk kartu untuk membalik, tandai yang sudah hafal.</p></header>
+ <section class="block"><div class="filters"><div class="field" style="flex:1;min-width:220px"><label for="dSel">Dek</label><select id="dSel"><option value="all">Semua langkah</option><option value="UTS">Fase UTS</option><option value="UAS">Fase UAS</option>${TOPICS.map(t=>`<option value="${t.id}">L${t.no} · ${esc(t.title)} (${t.cards.length})</option>`).join("")}</select></div><span class="mono muted">${known}/${total} hafal</span></div></section>
+ <section class="block" id="dBox" tabindex="-1"></section></div>`;
+ const go=()=>{const v=$("#dSel",app).value;const ids=v==="all"?TOPICS.map(t=>t.id):(v==="UTS"||v==="UAS")?TOPICS.filter(t=>t.fase===v).map(t=>t.id):[v];mountDeck($("#dBox",app),ids);};
+ $("#dSel",app).addEventListener("change",go);go();
+}
+
+// ===================== CASES =====================
+function resepSlip(c){
+ return `<div class="resep" aria-label="Resep"><div class="rhead"><span>${esc(c.head[0])}</span><span>${esc(c.head[1])}</span></div>
+ ${c.lines.map((l,i)=>`<span class="ln">${i===0?'<span class="rx">R/</span>':'<span class="rx" style="visibility:hidden">R/</span>'}${esc(l)}</span>`).join("")}
+ <span class="paraf" aria-hidden="true">✓paraf</span><div class="pro">${esc(c.pro)}</div></div>${c.info?`<p class="muted" style="font-size:.88rem">Diketahui: ${esc(c.info)}</p>`:""}`;
+}
+function renderCase(el,c){
+ el.innerHTML=`<div class="qmeta"><h3>${esc(c.title)}</h3><span class="chip">${esc(c.tag)}</span></div>
+ <div class="cols"><div>${resepSlip(c)}</div><div class="steps">${c.steps.map(s=>`<details class="step"><summary><span>${esc(s.q)}<span class="hint">Coba jawab dulu, lalu buka.</span></span></summary><div class="ans">${s.a}</div></details>`).join("")}
+ <button class="btn sm" data-openall>Buka semua langkah</button></div></div>`;
+ $("[data-openall]",el).addEventListener("click",e=>{const all=$$(".step",el);const anyClosed=all.some(d=>!d.open);all.forEach(d=>d.open=anyClosed);e.target.textContent=anyClosed?"Tutup semua langkah":"Buka semua langkah";});
+}
+function renderCasesView(app){
+ app.innerHTML=`<div class="view"><header class="thead" style="--ps:var(--line2)"><span class="eyebrow">Simulasi baca resep</span><h1>Kasus resep</h1><p>Bedah resep langkah demi langkah: terjemahkan, hitung bahan, cek DM, pilih kapsul, cara racik, dan BUD. Jawab di kertas dulu, baru buka tiap langkah.</p></header>
+ <div class="toolnav">${CASES.map(c=>`<a href="#kasus" data-jump="${c.id}">${esc(c.title)}</a>`).join("")}</div>
+ ${["UTS","UAS"].map(f=>`<h2 class="phasehead" style="font-size:1.3rem">Fase ${f}</h2>`+CASES.filter(c=>c.fase===f).map(c=>`<section class="block ${f.toLowerCase()}" id="case-${c.id}"></section>`).join("")).join("")}</div>`;
+ CASES.forEach(c=>renderCase($("#case-"+c.id,app),c));
+ $$("[data-jump]",app).forEach(a=>a.addEventListener("click",e=>{e.preventDefault();$("#case-"+a.dataset.jump,app).scrollIntoView({behavior:"smooth",block:"start"});}));
+}
+
+// ===================== TOOLS =====================
+function capsViz(sel){
+ const sz=[["000",1.36],["00",.95],["0",.67],["1",.5],["2",.37],["3",.3],["4",.21],["5",.12]];
+ return sz.map(([n,v])=>{const h=Math.round(26+v*44),w=Math.round(12+v*9);return `<div class="${n===sel?"sel":""}"><i style="width:${w}px;height:${h}px"></i>${n}</div>`;}).join("");
+}
+function sevenRule(mg){
+ const g=mg/65,r=7-g,rr=Math.round(r);
+ let size; if(rr<=-3)size="000";else if(rr===-2)size="00";else if(rr===-1||rr===0)size="0";else if(rr>=5)size="5";else size=String(rr);
+ return {g,r,rr,size,note:rr===0?"Hasil 0 tidak ada di tabel; dipilih no. 0 (ukuran lebih besar yang terdekat).":rr>5?"Serbuk sangat sedikit; pakai no. 5 atau tambah pengisi.":rr<-3?"Serbuk melebihi kapsul 000; bagi ke lebih banyak kapsul.":""};
+}
+const CAP_ML={"000":1.36,"00":.95,"0":.67,"1":.5,"2":.37,"3":.3,"4":.21,"5":.12};
+function field(id,label,val,extra=""){return `<div class="field"><label for="${id}">${label}</label><input id="${id}" type="text" inputmode="decimal" value="${val}" ${extra}></div>`;}
+
+const TOOLS={
+dosisanak:{render(el){
+ el.innerHTML=`<h3>Kalkulator dosis anak</h3><p class="muted">Isi umur dan/atau bobot. Semua rumus dihitung sekaligus; rumus yang dipakai di arsip ujian ditandai.</p>
+ <div class="grid">${field("da_y","Umur (tahun)","7")}${field("da_m","+ bulan","0")}${field("da_w","Bobot (kg)","22")}${field("da_h","Tinggi (cm, untuk LPT)","120")}${field("da_d","Dosis dewasa (mg)","500")}</div>
+ <div class="presets"><span class="muted" style="font-size:.85rem">Contoh slide:</span><button class="btn sm" data-p="7,0,,,500">Young 7 th</button><button class="btn sm" data-p="11,0,,,500">Dilling 11 th</button><button class="btn sm" data-p="0,5,,,500">Fried 5 bln</button><button class="btn sm" data-p="7,0,17,101,20">LPT omeprazol</button></div>
+ <div class="out" id="da_o"></div>`;
+ const calc=()=>{
+  const y=num($("#da_y",el).value)||0,m=num($("#da_m",el).value)||0,w=num($("#da_w",el).value),h=num($("#da_h",el).value),D=num($("#da_d",el).value);
+  const n=y+m/12,mon=y*12+m;
+  const lpt=(w>0&&h>0)?Math.sqrt(w*h/3600):NaN;
+  const gaub=n<1?1/12:n<2?1/8:n<3?1/6:n<4?1/4:n<7?1/3:n<14?1/2:n<21?2/3:1;
+  const rows=[
+   ["Young","n/(n+12)",n>0?n/(n+12):NaN,n>0&&n<8],
+   ["Dilling","n/20",n>0?n/20:NaN,n>=8],
+   ["Cowling","(n+1)/24",n>0?(n+1)/24:NaN,false],
+   ["Fried","bulan/150",mon>0&&n<2?mon/150:NaN,n<1&&mon>0],
+   ["Clark","pon/150",w>0?w*2.2/150:NaN,false],
+   ["Thremich-Fier","kg/70",w>0?w/70:NaN,false],
+   ["Black","kg/62",w>0?w/62:NaN,false],
+   ["Augsberger","(1,5·kg+10)/100",w>0?(1.5*w+10)/100:NaN,false],
+   ["LPT","LPT/1,73",lpt/1.73,false],
+   ["Gaubius","pecahan usia",n>0?gaub:NaN,false]];
+  $("#da_o",el).innerHTML=`<div class="calc">n = ${fmt(n,2)} tahun (${fmt(mon,0)} bulan)${isFinite(lpt)?` · LPT = √(${fmt(h,0)}×${fmt(w,1)}/3600) = ${fmt(lpt,3)} m²`:""}</div>
+  <div class="tw"><table class="t"><thead><tr><th>Rumus</th><th>Faktor</th><th>Dosis anak</th></tr></thead><tbody>${rows.map(([nm,f,v,rec])=>`<tr><td>${nm}${rec?' <span class="pill ok">arsip</span>':""}</td><td class="n">${f} = ${fmt(v,3)}</td><td class="n">${isFinite(D)&&isFinite(v)?fmt(v*D,2)+" mg":"–"}</td></tr>`).join("")}</tbody></table></div>`;
+ };
+ $$("input",el).forEach(i=>i.addEventListener("input",calc));
+ $$("[data-p]",el).forEach(b=>b.addEventListener("click",()=>{const [y,m,w,h,d]=b.dataset.p.split(",");$("#da_y",el).value=y;$("#da_m",el).value=m;$("#da_w",el).value=w;$("#da_h",el).value=h;$("#da_d",el).value=d;calc();}));
+ calc();}},
+
+dm:{render(el){
+ el.innerHTML=`<h3>Cek % dosis maksimum</h3><p class="muted">Masukkan dosis <b>sekali pakai</b> (per bungkus/kapsul). Faktor anak otomatis: Young &lt; 8 th, Dilling ≥ 8 th, Fried &lt; 1 th; dewasa 1; lansia sesuai FI III.</p>
+ <div class="grid">${field("dm_y","Umur (tahun)","6")}${field("dm_m","+ bulan","3")}${field("dm_f","Frekuensi per hari","3")}
+ <div class="field"><label for="dm_r">Faktor</label><select id="dm_r"><option value="auto">Otomatis</option><option value="young">Young</option><option value="dilling">Dilling</option><option value="fried">Fried</option><option value="dewasa">Dewasa (1)</option></select></div></div>
+ <div id="dm_rows" style="display:grid;gap:8px"></div>
+ <div class="deckbtns" style="justify-content:flex-start"><button class="btn sm" id="dm_add">+ Tambah obat</button><label class="muted" style="display:flex;gap:6px;align-items:center;font-size:.88rem"><input type="checkbox" id="dm_sum"> Kerja searah (hitung DM gabungan)</label></div>
+ <div class="presets"><span class="muted" style="font-size:.85rem">Contoh:</span><button class="btn sm" data-p="meta">Arsip: Meta</button><button class="btn sm" data-p="atro">Atropin dewasa</button><button class="btn sm" data-p="bell">DM gabungan</button></div>
+ <div class="out" id="dm_o"></div>`;
+ let rows=[{n:"Kodein",d:"5",d1:"60",dh:"300"},{n:"Efedrin HCl",d:"10",d1:"50",dh:"150"}];
+ const drawRows=()=>{$("#dm_rows",el).innerHTML=rows.map((r,i)=>`<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(120px,1fr));align-items:end">
+  <div class="field"><label for="dm_n${i}">Obat</label><input id="dm_n${i}" type="text" value="${esc(r.n)}" data-i="${i}" data-k="n"></div>
+  <div class="field"><label for="dm_d${i}">Dosis sekali (mg)</label><input id="dm_d${i}" type="text" inputmode="decimal" value="${r.d}" data-i="${i}" data-k="d"></div>
+  <div class="field"><label for="dm_a${i}">DM sekali dewasa</label><input id="dm_a${i}" type="text" inputmode="decimal" value="${r.d1}" data-i="${i}" data-k="d1"></div>
+  <div class="field"><label for="dm_b${i}">DM sehari dewasa</label><input id="dm_b${i}" type="text" inputmode="decimal" value="${r.dh}" data-i="${i}" data-k="dh"></div>
+  ${rows.length>1?`<button class="btn sm" data-del="${i}" aria-label="Hapus ${esc(r.n)}">Hapus</button>`:""}</div>`).join("");
+  $$("#dm_rows input",el).forEach(inp=>inp.addEventListener("input",()=>{rows[+inp.dataset.i][inp.dataset.k]=inp.value;calc();}));
+  $$("[data-del]",el).forEach(b=>b.addEventListener("click",()=>{rows.splice(+b.dataset.del,1);drawRows();calc();}));};
+ const calc=()=>{
+  const y=num($("#dm_y",el).value)||0,m=num($("#dm_m",el).value)||0,fr=num($("#dm_f",el).value),mode=$("#dm_r",el).value;
+  const n=y+m/12; let fac=1,why="";
+  const pick=mode==="auto"?(n>=20?(n>=90?"l50":n>=80?"l23":n>=70?"l34":n>=60?"l45":"dewasa"):n<1?"fried":n<8?"young":"dilling"):mode;
+  if(pick==="young"){fac=n/(n+12);why=`Young ${fmt(n,2)}/(${fmt(n,2)}+12)`;}
+  else if(pick==="dilling"){fac=n/20;why=`Dilling ${fmt(n,2)}/20`;}
+  else if(pick==="fried"){fac=(y*12+m)/150;why=`Fried ${fmt(y*12+m,0)}/150`;}
+  else if(pick==="l45"){fac=.8;why="Lansia 60–70 th: 4/5";}else if(pick==="l34"){fac=.75;why="Lansia 70–80 th: 3/4";}else if(pick==="l23"){fac=2/3;why="Lansia 80–90 th: 2/3";}else if(pick==="l50"){fac=.5;why="Lansia > 90 th: 1/2";}
+  else {fac=1;why="Dewasa";}
+  let s1=0,sh=0;
+  const out=rows.map(r=>{const d=num(r.d),a=num(r.d1)*fac,b=num(r.dh)*fac;const p1=d/a*100,ph=d*fr/b*100;if(isFinite(p1))s1+=p1;if(isFinite(ph))sh+=ph;
+   return `<tr><td>${esc(r.n)}</td><td class="n">${fmt(d,2)} / ${fmt(a,2)} = ${fmt(p1,1)}% ${pill(p1)}</td><td class="n">${fmt(d*fr,2)} / ${fmt(b,2)} = ${fmt(ph,1)}% ${pill(ph)}</td></tr>`;}).join("");
+  const sum=$("#dm_sum",el).checked&&rows.length>1;
+  $("#dm_o",el).innerHTML=`<div class="calc">Faktor = ${why} = ${fmt(fac,4)} · DM anak = faktor × DM dewasa</div>
+  <div class="tw"><table class="t"><thead><tr><th>Obat</th><th>% DM sekali</th><th>% DM sehari</th></tr></thead><tbody>${out}
+  ${sum?`<tr><td><b>Gabungan</b></td><td class="n"><b>${fmt(s1,1)}%</b> ${pill(s1)}</td><td class="n"><b>${fmt(sh,1)}%</b> ${pill(sh)}</td></tr>`:""}</tbody></table></div>
+  <span class="muted" style="font-size:.86rem">&gt; 100% = terlampaui: obat dibuat hanya jika dokter memberi tanda seru (!) + paraf. &gt; 80% = puyer ditimbang satu per satu.</span>`;
+ };
+ const pill=p=>!isFinite(p)?"":p>100?'<span class="pill bad">lampau</span>':p>80?'<span class="pill warn">&gt;80%</span>':'<span class="pill ok">aman</span>';
+ $("#dm_add",el).addEventListener("click",()=>{if(rows.length<5){rows.push({n:"Obat "+(rows.length+1),d:"",d1:"",dh:""});drawRows();calc();}});
+ ["#dm_y","#dm_m","#dm_f"].forEach(s=>$(s,el).addEventListener("input",calc));$("#dm_r",el).addEventListener("change",calc);$("#dm_sum",el).addEventListener("change",calc);
+ const P={meta:{y:6,m:3,f:3,sum:false,rows:[{n:"Kodein",d:"5",d1:"60",dh:"300"},{n:"Efedrin HCl",d:"10",d1:"50",dh:"150"}]},
+  atro:{y:30,m:0,f:4,sum:false,rows:[{n:"Atropin sulfat",d:"1,5",d1:"2",dh:"4"}]},
+  bell:{y:30,m:0,f:3,sum:true,rows:[{n:"Atropin sulfat",d:"0,25",d1:"1",dh:"3"},{n:"Ekstrak belladon",d:"10",d1:"20",dh:"80"}]}};
+ $$("[data-p]",el).forEach(b=>b.addEventListener("click",()=>{const p=P[b.dataset.p];$("#dm_y",el).value=p.y;$("#dm_m",el).value=p.m;$("#dm_f",el).value=p.f;$("#dm_sum",el).checked=p.sum;$("#dm_r",el).value="auto";rows=p.rows.map(r=>({...r}));drawRows();calc();}));
+ drawRows();calc();}},
+
+encer:{render(el){
+ el.innerHTML=`<h3>Kalkulator pengenceran</h3><p class="muted">Masukkan jumlah <b>total</b> bahan yang harus ditimbang untuk seluruh resep. Batas timbang terendah 50 mg.</p>
+ <div class="grid">${field("en_x","Jumlah bahan (mg)","5")}<div class="field"><label for="en_t">Bentuk</label><select id="en_t"><option value="p">Padat (dengan SL)</option><option value="c">Cair (50 mg ad 10 ml)</option></select></div></div>
+ <div class="presets"><span class="muted" style="font-size:.85rem">Tugas slide:</span>${[["CTM",4],["Metilprednisolon",8],["Cetirizine",7],["Tiamin",3],["Vit B12",.9],["Tamsulosin",.8],["Asam folat",.8],["Vit B6",20],["Captopril",20],["Vit B12",.5]].map(([n,v])=>`<button class="btn sm" data-v="${v}">${n} ${String(v).replace(".",",")} mg</button>`).join("")}</div>
+ <div class="out" id="en_o"></div>`;
+ const calc=()=>{
+  const x=num($("#en_x",el).value),t=$("#en_t",el).value,o=$("#en_o",el);
+  if(!(x>0)){o.innerHTML='<span class="muted">Isi jumlah bahan dalam mg.</span>';return;}
+  if(t==="c"){o.innerHTML=`<div class="res">Ambil ${fmt(x/50*10,2)} ml</div><div class="calc">Timbang 50 mg, larutkan ad 10 ml → ${fmt(x,2)}/50 × 10 ml = ${fmt(x/50*10,2)} ml</div>`;return;}
+  if(x>=50){o.innerHTML=`<div class="res">Timbang langsung ${fmt(x,2)} mg</div><div class="calc">≥ 50 mg, tidak perlu pengenceran (bahan &lt; 1 g pakai timbangan miligram).</div>`;return;}
+  if(x>=10){o.innerHTML=`<div class="res">1:10 → ambil ${fmt(x*10,1)} mg</div><div class="calc">Timbang 50 mg bahan + SL 450 mg = 500 mg (gerus homogen)\nAmbil ${fmt(x,2)}/50 × 500 = ${fmt(x*10,1)} mg hasil pengenceran\nSL ikut terbawa: ${fmt(x*10-x,1)} mg (kurangi dari SL q.s.)</div>`;return;}
+  if(x>=1){o.innerHTML=`<div class="res">1:50 → ambil ${fmt(x*50,1)} mg</div><div class="calc">Timbang 50 mg bahan + SL 2450 mg = 2500 mg (gerus homogen)\nAmbil ${fmt(x,2)}/50 × 2500 = ${fmt(x*50,1)} mg hasil pengenceran\nSL ikut terbawa: ${fmt(x*50-x,1)} mg</div>`;return;}
+  if(x>=0.1){const take=x/5*1000;o.innerHTML=`<div class="res">Bertingkat → ambil ${fmt(take,1)} mg</div><div class="calc">Pengenceran I (1:10): 50 mg bahan + 450 mg SL = 500 mg
+Ambil 50 mg pengenceran I (berisi 5 mg bahan)
+Pengenceran II: 50 mg + 950 mg SL = 1000 mg (berisi 5 mg bahan)
+Ambil ${fmt(x,2)}/5 × 1000 = ${fmt(take,1)} mg pengenceran II</div>`;return;}
+  o.innerHTML='<div class="res">Di bawah 0,1 mg</div><div class="calc">Di luar rentang slide; perlu pengenceran bertingkat lebih dari dua kali.</div>';
+ };
+ $("#en_x",el).addEventListener("input",calc);$("#en_t",el).addEventListener("change",calc);
+ $$("[data-v]",el).forEach(b=>b.addEventListener("click",()=>{$("#en_x",el).value=String(b.dataset.v).replace(".",",");$("#en_t",el).value="p";calc();}));
+ calc();}},
+
+kapsul:{render(el){
+ el.innerHTML=`<h3>Pilih nomor kapsul (Aturan Tujuh)</h3><p class="muted">Isi bobot serbuk per kapsul, atau total serbuk dan jumlah kapsul.</p>
+ <div class="grid">${field("kp_t","Total serbuk (mg)","2400")}${field("kp_n","Jumlah kapsul","12")}${field("kp_x","atau bobot per kapsul (mg)","")}</div>
+ <div class="presets"><span class="muted" style="font-size:.85rem">Contoh:</span><button class="btn sm" data-p="2400,12">Arsip Meta</button><button class="btn sm" data-p="2600,10">HCT–triamteren</button><button class="btn sm" data-p="325,1">325 mg</button></div>
+ <div class="out" id="kp_o"></div>`;
+ const calc=()=>{
+  const x0=num($("#kp_x",el).value),t=num($("#kp_t",el).value),n=num($("#kp_n",el).value);
+  const x=x0>0?x0:(t>0&&n>0?t/n:NaN),o=$("#kp_o",el);
+  if(!(x>0)){o.innerHTML='<span class="muted">Isi bobot.</span>';return;}
+  const r=sevenRule(x);
+  o.innerHTML=`<div class="res">Kapsul no. ${r.size}</div><div class="calc">${x0>0?"":`${fmt(t,0)} mg ÷ ${fmt(n,0)} = `}${fmt(x,1)} mg per kapsul
+${fmt(x,1)} ÷ 65 = ${fmt(r.g,2)} grain
+7 − ${fmt(r.g,2)} = ${fmt(r.r,2)} → dibulatkan ${r.rr} → no. ${r.size} (kapasitas ${String(CAP_ML[r.size]).replace(".",",")} ml)</div>${r.note?`<span class="muted">${r.note}</span>`:""}
+  <div class="capsviz">${capsViz(r.size)}</div>`;
+ };
+ $$("input",el).forEach(i=>i.addEventListener("input",calc));
+ $$("[data-p]",el).forEach(b=>b.addEventListener("click",()=>{const [t,n]=b.dataset.p.split(",");$("#kp_t",el).value=t;$("#kp_n",el).value=n;$("#kp_x",el).value="";calc();}));
+ calc();}},
+
+tablet:{render(el){
+ el.innerHTML=`<h3>Racik puyer/kapsul dari tablet</h3><p class="muted">Untuk tiap bahan isi dosis per bungkus. Jenis "tablet": isi kekuatan & bobot tablet. Jenis "serbuk": bahan murni. Hasil: jumlah tablet, bobot ditimbang, bobot per bungkus, SL q.s., dan nomor kapsul.</p>
+ <div class="grid">${field("tb_n","Jumlah bungkus/kapsul","12")}${field("tb_w","Target bobot per bungkus (mg, opsional)","")}</div>
+ <div id="tb_rows" style="display:grid;gap:8px"></div>
+ <div class="deckbtns" style="justify-content:flex-start"><button class="btn sm" id="tb_add">+ Tambah bahan</button></div>
+ <div class="presets"><span class="muted" style="font-size:.85rem">Contoh:</span><button class="btn sm" data-p="meta">Arsip: Meta (kapsul)</button><button class="btn sm" data-p="mela">Arsip: Mela (puyer 400 mg)</button><button class="btn sm" data-p="hct">HCT–triamteren</button></div>
+ <div class="out" id="tb_o"></div>`;
+ const PR={meta:{n:12,w:"",rows:[{nm:"Kodein",k:"t",d:"5",s:"10",b:"100"},{nm:"Pamol",k:"t",d:"100",s:"500",b:"700"},{nm:"Efedrin HCl",k:"p",d:"10",s:"",b:""}]},
+  mela:{n:12,w:"400",rows:[{nm:"Piridoksin HCl",k:"p",d:"50",s:"",b:""},{nm:"Pamol",k:"t",d:"125",s:"500",b:"700"},{nm:"Efedrin HCl",k:"t",d:"4,1667",s:"10",b:"100"},{nm:"Aminofilin",k:"p",d:"100",s:"",b:""}]},
+  hct:{n:10,w:"",rows:[{nm:"HCT",k:"t",d:"20",s:"50",b:"150"},{nm:"Triamteren",k:"t",d:"40",s:"50",b:"250"}]}};
+ let rows=PR.meta.rows.map(r=>({...r}));
+ const drawRows=()=>{$("#tb_rows",el).innerHTML=rows.map((r,i)=>`<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(110px,1fr));align-items:end">
+  <div class="field"><label for="tb_nm${i}">Bahan</label><input id="tb_nm${i}" type="text" value="${esc(r.nm)}" data-i="${i}" data-k="nm"></div>
+  <div class="field"><label for="tb_k${i}">Jenis</label><select id="tb_k${i}" data-i="${i}" data-k="k"><option value="t" ${r.k==="t"?"selected":""}>Tablet</option><option value="p" ${r.k==="p"?"selected":""}>Serbuk</option></select></div>
+  <div class="field"><label for="tb_d${i}">Dosis/bungkus (mg)</label><input id="tb_d${i}" type="text" inputmode="decimal" value="${r.d}" data-i="${i}" data-k="d"></div>
+  <div class="field"><label for="tb_s${i}">Kekuatan tab (mg)</label><input id="tb_s${i}" type="text" inputmode="decimal" value="${r.s}" data-i="${i}" data-k="s" ${r.k==="p"?"disabled":""}></div>
+  <div class="field"><label for="tb_b${i}">Bobot tab (mg)</label><input id="tb_b${i}" type="text" inputmode="decimal" value="${r.b}" data-i="${i}" data-k="b" ${r.k==="p"?"disabled":""}></div>
+  ${rows.length>1?`<button class="btn sm" data-del="${i}" aria-label="Hapus ${esc(r.nm)}">Hapus</button>`:""}</div>`).join("");
+  $$("#tb_rows input,#tb_rows select",el).forEach(inp=>inp.addEventListener(inp.tagName==="SELECT"?"change":"input",()=>{rows[+inp.dataset.i][inp.dataset.k]=inp.value;if(inp.tagName==="SELECT")drawRows();calc();}));
+  $$("[data-del]",el).forEach(b=>b.addEventListener("click",()=>{rows.splice(+b.dataset.del,1);drawRows();calc();}));};
+ const calc=()=>{
+  const N=num($("#tb_n",el).value),W=num($("#tb_w",el).value);
+  if(!(N>0)){$("#tb_o",el).innerHTML='<span class="muted">Isi jumlah bungkus.</span>';return;}
+  let tot=0;const lines=rows.map(r=>{const d=num(r.d);if(!isFinite(d))return `<tr><td>${esc(r.nm)}</td><td colspan="3" class="muted">isi dosis</td></tr>`;
+   const need=d*N;if(r.k==="t"){const s=num(r.s),b=num(r.b);const nt=need/s,wt=nt*b;tot+=wt;
+    return `<tr><td>${esc(r.nm)}</td><td class="n">${fmt(d,2)} × ${fmt(N,0)} = ${fmt(need,2)} mg</td><td class="n">${fmt(need,2)}/${fmt(s,0)} = ${fmt(nt,2)} tab</td><td class="n">${fmt(nt,2)} × ${fmt(b,0)} = ${fmt(wt,1)} mg</td></tr>`;}
+   tot+=need;return `<tr><td>${esc(r.nm)}</td><td class="n">${fmt(d,2)} × ${fmt(N,0)} = ${fmt(need,2)} mg</td><td class="n">serbuk</td><td class="n">${fmt(need,1)} mg${need<50?' <span class="pill warn">&lt;50 mg: encerkan</span>':""}</td></tr>`;}).join("");
+  const per=tot/N,r=sevenRule(per);
+  const sl=W>0?(W-per):NaN;
+  $("#tb_o",el).innerHTML=`<div class="tw"><table class="t"><thead><tr><th>Bahan</th><th>Total zat</th><th>Tablet</th><th>Ditimbang</th></tr></thead><tbody>${lines}</tbody></table></div>
+  <div class="calc">Total serbuk = ${fmt(tot,1)} mg → per bungkus ${fmt(per,1)} mg</div>
+  ${W>0?(sl>=0?`<div class="res">SL q.s. = ${fmt(sl,1)} mg/bungkus · ${fmt(sl*N,1)} mg total</div>`:`<div class="res">Bobot bahan melebihi target ${fmt(W,0)} mg</div>`):""}
+  <div class="calc">Jika dimasukkan kapsul: ${fmt(per,1)}/65 = ${fmt(r.g,2)} grain → 7 − ${fmt(r.g,2)} = ${fmt(r.r,2)} → kapsul no. ${r.size}</div>`;
+ };
+ $("#tb_add",el).addEventListener("click",()=>{if(rows.length<6){rows.push({nm:"Bahan "+(rows.length+1),k:"p",d:"",s:"",b:""});drawRows();calc();}});
+ ["#tb_n","#tb_w"].forEach(s=>$(s,el).addEventListener("input",calc));
+ $$("[data-p]",el).forEach(b=>b.addEventListener("click",()=>{const p=PR[b.dataset.p];$("#tb_n",el).value=p.n;$("#tb_w",el).value=p.w;rows=p.rows.map(r=>({...r}));drawRows();calc();}));
+ drawRows();calc();}},
+
+pil:{render(el){
+ el.innerHTML=`<h3>Takaran zat tambahan pil</h3><p class="muted">Patokan dari slide Pilulae untuk sejumlah pil.</p>
+ <div class="grid">${field("pl_n","Jumlah pil","30")}${field("pl_z","Zat padat oksidator total (g, opsional)","")}</div><div class="out" id="pl_o"></div>`;
+ const calc=()=>{const n=num($("#pl_n",el).value),z=num($("#pl_z",el).value);if(!(n>0)){$("#pl_o",el).innerHTML='<span class="muted">Isi jumlah pil.</span>';return;}
+  const k=n/30;
+  $("#pl_o",el).innerHTML=`<div class="tw"><table class="t"><thead><tr><th>Zat</th><th>Patokan</th><th>Untuk ${fmt(n,0)} pil</th></tr></thead><tbody>
+  <tr><td>Succus liquiritiae (pengikat)</td><td>1 g / 30 pil</td><td class="n">${fmt(k,2)} g</td></tr>
+  <tr><td>Liquiritiae radix (pengisi, obat cair)</td><td>±2 g / 30 pil</td><td class="n">${fmt(2*k,2)} g</td></tr>
+  <tr><td>Pulvis gummosus</td><td>300 mg / 30 pil (voluminous ±1 g)</td><td class="n">${fmt(.3*k,2)} g (${fmt(k,2)} g)</td></tr>
+  <tr><td>Bolus alba (oksidator)</td><td>100 mg / pil</td><td class="n">${fmt(.1*n,2)} g</td></tr>
+  ${z>0?`<tr><td>Adeps lanae/vaselin (oksidator)</td><td>±⅙ zat padat</td><td class="n">${fmt(z/6,2)} g</td></tr>`:""}
+  <tr><td>Granula: sacch. pulv. + pulv. gummosus</td><td>22 mg + 3 mg / granul</td><td class="n">${fmt(.022*n,2)} g + ${fmt(.003*n,3)} g</td></tr></tbody></table></div>`;};
+ $$("input",el).forEach(i=>i.addEventListener("input",calc));calc();}},
+
+unit:{render(el){
+ el.innerHTML=`<h3>Salep antibiotik dalam unit</h3><p class="muted">Seluruh isi vial dicampur vaselin sampai bobot tertentu, lalu diambil sesuai unit yang diminta.</p>
+ <div class="grid">${field("un_v","Isi vial (U)","500000")}${field("un_m","Vial + vaselin ad (g)","10")}${field("un_x","Unit diminta resep (U)","100000")}${field("un_b","Vaselin di resep (g)","7")}</div><div class="out" id="un_o"></div>`;
+ const calc=()=>{const v=num($("#un_v",el).value),m=num($("#un_m",el).value),x=num($("#un_x",el).value),b=num($("#un_b",el).value);
+  const c=v/m,g=x/c;
+  $("#un_o",el).innerHTML=`<div class="res">Ambil ${fmt(g,2)} g campuran${isFinite(b)?` · vaselin tambahan ${fmt(b-g,2)} g`:""}</div><div class="calc">Kadar campuran = ${fmt(v,0)} U ÷ ${fmt(m,2)} g = ${fmt(c,0)} U/g
+${fmt(x,0)} U ÷ ${fmt(c,0)} U/g = ${fmt(g,2)} g${isFinite(b)?`\nCampuran sudah berisi vaselin → ${fmt(b,2)} − ${fmt(g,2)} = ${fmt(b-g,2)} g`:""}</div>`;};
+ $$("input",el).forEach(i=>i.addEventListener("input",calc));calc();}},
+
+bud:{render(el){
+ const today=new Date();const iso=d=>d.toISOString().slice(0,10);const ed=new Date(today);ed.setFullYear(ed.getFullYear()+1);
+ el.innerHTML=`<h3>Kalkulator BUD racikan nonsteril</h3><p class="muted">Mengikuti skema slide BUD (USP 795).</p>
+ <div class="grid"><div class="field"><label for="bd_j">Jenis racikan</label><select id="bd_j"><option value="a">Puyer/kapsul dari obat jadi</option><option value="b">Padat/non-aqueous dari zat aktif</option><option value="c">Oral mengandung air</option><option value="d">Topikal berair / setengah padat</option></select></div>
+ <div class="field"><label for="bd_r">Tanggal peracikan</label><input id="bd_r" type="date" value="${iso(today)}"></div>
+ <div class="field"><label for="bd_e">ED bahan terdekat</label><input id="bd_e" type="date" value="${iso(ed)}"></div></div><div class="out" id="bd_o"></div>`;
+ const addM=(d,m)=>{const x=new Date(d);x.setMonth(x.getMonth()+m);return x;};
+ const show=d=>d.toLocaleDateString("id-ID",{day:"numeric",month:"long",year:"numeric"});
+ const calc=()=>{const j=$("#bd_j",el).value,r=new Date($("#bd_r",el).value),e=new Date($("#bd_e",el).value),o=$("#bd_o",el);
+  if(isNaN(r)){o.innerHTML='<span class="muted">Isi tanggal peracikan.</span>';return;}
+  const six=addM(r,6);
+  if(j==="c"||j==="d"){const days=j==="c"?14:30;const b=new Date(r);b.setDate(b.getDate()+days);const fin=!isNaN(e)&&e<b?e:b;
+   o.innerHTML=`<div class="res">BUD: ${show(fin)}</div><div class="calc">${j==="c"?"Oral berair: maks 14 hari, simpan 2–8 °C":"Topikal berair/setengah padat: maks 30 hari"}${!isNaN(e)&&e<b?"\nED bahan lebih dulu → BUD = ED":""}</div>`;return;}
+  if(isNaN(e)){o.innerHTML='<span class="muted">Isi ED bahan.</span>';return;}
+  if(e<=r){o.innerHTML='<div class="res">Bahan sudah kedaluwarsa</div><span class="muted">Jangan dipakai.</span>';return;}
+  const sisaHari=(e-r)/864e5,sisaBln=sisaHari/30.44;
+  if(j==="b"){const fin=e<six?e:six;o.innerHTML=`<div class="res">BUD: ${show(fin)}</div><div class="calc">Dari zat aktif: ED bahan atau 6 bulan, mana yang lebih dulu\nSisa ED ${fmt(sisaBln,1)} bulan → ${e<six?"ED lebih dulu":"6 bulan lebih dulu"}</div>`;return;}
+  if(e<six){o.innerHTML=`<div class="res">BUD: ${show(e)} (= ED)</div><div class="calc">Sisa ED ${fmt(sisaBln,1)} bulan (&lt; 6 bulan) → BUD maks = ED</div>`;return;}
+  const q=new Date(r.getTime()+sisaHari*.25*864e5);const fin=q<six?q:six;
+  o.innerHTML=`<div class="res">BUD: ${show(fin)}</div><div class="calc">Sisa ED ${fmt(sisaBln,1)} bulan (&gt; 6 bulan)
+25% × ${fmt(sisaBln,1)} = ${fmt(sisaBln*.25,1)} bulan → ${q<six?"< 6 bulan, BUD = hasil hitungan":"> 6 bulan, BUD = 6 bulan"}</div>`;};
+ $$("input,select",el).forEach(i=>i.addEventListener("input",calc));$("#bd_j",el).addEventListener("change",calc);calc();}},
+
+romawi:{render(el){
+ el.innerHTML=`<h3>Konversi angka Romawi</h3><div class="grid">${field("rm_r","Romawi","XXIX")}${field("rm_a","Arab","")}</div><div class="out" id="rm_o"></div>`;
+ const V={I:1,V:5,X:10,L:50,C:100,D:500,M:1000};
+ const toA=s=>{s=s.toUpperCase().replace(/[^IVXLCDM]/g,"");let t=0,st=[];for(let i=0;i<s.length;i++){const a=V[s[i]],b=V[s[i+1]]||0;if(a<b){t-=a;st.push("−"+a);}else{t+=a;st.push("+"+a);}}return [t,st.join(" ").replace(/^\+/,"")];};
+ const toR=n=>{const m=[[1000,"M"],[900,"CM"],[500,"D"],[400,"CD"],[100,"C"],[90,"XC"],[50,"L"],[40,"XL"],[10,"X"],[9,"IX"],[5,"V"],[4,"IV"],[1,"I"]];let r="";for(const [v,s] of m)while(n>=v){r+=s;n-=v;}return r;};
+ $("#rm_r",el).addEventListener("input",()=>{const [t,st]=toA($("#rm_r",el).value);$("#rm_a",el).value=t||"";$("#rm_o",el).innerHTML=t?`<div class="res">${t}</div><div class="calc">${st} = ${t}</div>`:'<span class="muted">Ketik huruf I V X L C D M.</span>';});
+ $("#rm_a",el).addEventListener("input",()=>{const n=parseInt($("#rm_a",el).value,10);if(n>0&&n<4000){const r=toR(n);$("#rm_r",el).value=r;$("#rm_o",el).innerHTML=`<div class="res">${r}</div>`;}});
+ $("#rm_r",el).dispatchEvent(new Event("input"));}},
+};
+TOOLS.qs=TOOLS.tablet;
+const TOOL_LIST=[["dosisanak","Dosis anak"],["dm","Cek % DM"],["encer","Pengenceran"],["tablet","Racik dari tablet"],["kapsul","Nomor kapsul"],["pil","Zat tambahan pil"],["unit","Salep unit"],["bud","BUD"],["romawi","Romawi"]];
+function renderTools(app){
+ app.innerHTML=`<div class="view"><header class="thead" style="--ps:var(--uas-soft)"><span class="eyebrow">Alat hitung</span><h1>Meja hitung apoteker</h1><p>Semua kalkulator menampilkan langkah hitungnya, jadi bisa dipakai untuk mengecek jawaban latihan, bukan sekadar mencari angka.</p></header>
+ <div class="toolnav">${TOOL_LIST.map(([id,n])=>`<a href="#alat" data-jump="${id}">${n}</a>`).join("")}</div>
+ <div class="tools">${TOOL_LIST.map(([id])=>`<section class="block tool" id="tool-${id}"></section>`).join("")}</div></div>`;
+ TOOL_LIST.forEach(([id])=>TOOLS[id].render($("#tool-"+id,app)));
+ $$("[data-jump]",app).forEach(a=>a.addEventListener("click",e=>{e.preventDefault();$("#tool-"+a.dataset.jump,app).scrollIntoView({behavior:"smooth",block:"start"});}));
+}
+
+// ===================== BOOT =====================
+document.addEventListener("DOMContentLoaded",()=>{
+ $$(".nav a").forEach(a=>{const k=a.dataset.ic;if(k&&IC[k])a.insertAdjacentHTML("afterbegin",IC[k]);});
+ paintThemeBtn();route();
+});
+
+</script>
+
+</body>
+</html>
